@@ -1,0 +1,1113 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>GymLog — Dein Trainings-Tracker</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;900&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg:        #0e0e0f;
+    --surface:  #161618;
+    --card:      #1c1c1f;
+    --border:    #2a2a2e;
+    --accent:    #e8ff47;
+    --accent2:  #ff5c3a;
+    --text:      #f0efe8;
+    --muted:    #6b6b72;
+    --success:  #3ecf6f;
+    --radius:    12px;
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 400;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ── Header ── */
+  header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.25rem 2rem;
+    border-bottom: 1px solid var(--border);
+    position: sticky;
+    top: 0;
+    background: rgba(14,14,15,0.88);
+    backdrop-filter: blur(12px);
+    z-index: 100;
+  }
+
+  .logo {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 900;
+    font-size: 1.75rem;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+  .logo span { color: var(--accent); }
+
+  .header-actions { display: flex; align-items: center; gap: 0.75rem; }
+
+  .btn {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.875rem;
+    font-weight: 500;
+    padding: 0.5rem 1.1rem;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all .18s ease;
+    border: 1px solid var(--border);
+    background: var(--card);
+    color: var(--text);
+  }
+  .btn:hover { border-color: #444; background: #262628; }
+  .btn.primary {
+    background: var(--accent);
+    color: #0e0e0f;
+    border-color: var(--accent);
+    font-weight: 600;
+  }
+  .btn.primary:hover { background: #d6ed3e; }
+
+  /* ── Layout ── */
+  .container {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 2rem 1.5rem 4rem;
+  }
+
+  /* ── Stats Bar ── */
+  .stats-bar {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 1rem;
+    margin-bottom: 2.5rem;
+  }
+
+  .stat-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.25rem 1.25rem 1rem;
+    position: relative;
+    overflow: hidden;
+  }
+  .stat-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: var(--accent);
+    opacity: 0.6;
+  }
+  .stat-card.accent2::before { background: var(--accent2); }
+  .stat-card.success::before { background: var(--success); }
+
+  .stat-label {
+    font-size: 0.72rem;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 0.4rem;
+  }
+  .stat-value {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 2rem;
+    font-weight: 700;
+    line-height: 1;
+  }
+  .stat-sub {
+    font-size: 0.75rem;
+    color: var(--muted);
+    margin-top: 0.2rem;
+  }
+
+  /* ── Section Titles ── */
+  h2 {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 1.4rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-bottom: 1rem;
+    color: var(--text);
+  }
+  h2 .dim { color: var(--muted); font-weight: 400; }
+
+  /* ── Two-col layout ── */
+  .grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+  }
+  @media (max-width: 720px) { .grid-2 { grid-template-columns: 1fr; } }
+
+  /* ── Workout Log ── */
+  .workout-log {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    margin-bottom: 2.5rem;
+  }
+
+  .workout-entry {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem 1.25rem;
+    cursor: pointer;
+    transition: border-color .18s, background .18s;
+  }
+  .workout-entry:hover { border-color: #3a3a40; background: #202023; }
+
+  .we-date {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700;
+    font-size: 1.1rem;
+    color: var(--accent);
+    min-width: 44px;
+    text-align: center;
+    line-height: 1.1;
+  }
+  .we-date small {
+    display: block;
+    font-size: 0.6rem;
+    font-weight: 400;
+    color: var(--muted);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .we-divider {
+    width: 1px;
+    height: 36px;
+    background: var(--border);
+    flex-shrink: 0;
+  }
+
+  .we-info { flex: 1; min-width: 0; }
+  .we-title {
+    font-size: 0.95rem;
+    font-weight: 500;
+    margin-bottom: 0.2rem;
+  }
+  .we-meta {
+    font-size: 0.78rem;
+    color: var(--muted);
+    display: flex;
+    gap: 1rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .we-meta span::before { content: '· '; }
+  .we-meta span:first-child::before { content: ''; }
+
+  .we-badge {
+    font-size: 0.7rem;
+    font-weight: 600;
+    padding: 0.2rem 0.6rem;
+    border-radius: 20px;
+    background: rgba(232,255,71,0.1);
+    color: var(--accent);
+    border: 1px solid rgba(232,255,71,0.2);
+  }
+  .we-badge.push { background: rgba(255,92,58,0.1); color: var(--accent2); border-color: rgba(255,92,58,0.2); }
+  .we-badge.pull { background: rgba(62,207,111,0.1); color: var(--success); border-color: rgba(62,207,111,0.2); }
+
+  .delete-w-btn {
+    background: none;
+    border: none;
+    color: var(--muted);
+    cursor: pointer;
+    font-size: 1.1rem;
+    padding: 0.4rem;
+    line-height: 1;
+    transition: color .15s;
+  }
+  .delete-w-btn:hover { color: var(--accent2); }
+
+  /* ── Übungs-Log / Modal ── */
+  .section { margin-bottom: 2.5rem; }
+
+  /* ── Overlays & Modals ── */
+  .overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.75);
+    z-index: 200;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(4px);
+  }
+  .overlay.open { display: flex; }
+
+  .modal {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 2rem;
+    width: min(520px, 92vw);
+    max-height: 88vh;
+    overflow-y: auto;
+    animation: slideUp .22s ease;
+  }
+  @keyframes slideUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .modal h3 {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 1.5rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 1.5rem;
+  }
+
+  .form-row {
+    display: flex;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+  }
+
+  .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    flex: 1;
+  }
+
+  label {
+    font-size: 0.75rem;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+
+  input, select, textarea {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.9rem;
+    padding: 0.6rem 0.9rem;
+    outline: none;
+    transition: border-color .18s;
+    width: 100%;
+  }
+  input:focus, select:focus, textarea:focus { border-color: var(--accent); }
+  select option { background: var(--card); }
+  textarea { resize: vertical; min-height: 70px; }
+
+  .exercises-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+  }
+
+  .exercise-row {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr 1fr 28px;
+    gap: 0.5rem;
+    align-items: end;
+  }
+
+  .remove-ex {
+    background: none;
+    border: none;
+    color: var(--muted);
+    cursor: pointer;
+    font-size: 1.1rem;
+    padding: 0.4rem;
+    line-height: 1;
+    transition: color .15s;
+  }
+  .remove-ex:hover { color: var(--accent2); }
+
+  .add-ex-btn {
+    background: none;
+    border: 1px dashed var(--border);
+    border-radius: 8px;
+    color: var(--muted);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.85rem;
+    padding: 0.55rem;
+    cursor: pointer;
+    width: 100%;
+    transition: all .18s;
+    margin-bottom: 1.25rem;
+  }
+  .add-ex-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+  .modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.75rem;
+    margin-top: 0.5rem;
+  }
+
+  /* ── PR Chart ── */
+  .pr-chart {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.25rem;
+  }
+
+  .pr-chart canvas { width: 100% !important; }
+
+  .pr-tabs {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+    flex-wrap: wrap;
+  }
+  .pr-tab {
+    font-size: 0.8rem;
+    padding: 0.3rem 0.8rem;
+    border-radius: 20px;
+    border: 1px solid var(--border);
+    background: none;
+    color: var(--muted);
+    cursor: pointer;
+    transition: all .18s;
+    font-family: 'DM Sans', sans-serif;
+  }
+  .pr-tab.active {
+    background: var(--accent);
+    color: #0e0e0f;
+    border-color: var(--accent);
+    font-weight: 600;
+  }
+
+  /* ── Streak heatmap ── */
+  .heatmap-grid {
+    display: grid;
+    grid-template-rows: repeat(7, 1fr);
+    grid-auto-flow: column;
+    gap: 4px;
+    margin-top: 0.75rem;
+  }
+  .hm-cell {
+    aspect-ratio: 1;
+    border-radius: 3px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    cursor: default;
+    transition: transform .12s;
+  }
+  .hm-cell:hover { transform: scale(1.3); }
+  .hm-cell.l1 { background: rgba(232,255,71,0.15); border-color: rgba(232,255,71,0.2); }
+  .hm-cell.l2 { background: rgba(232,255,71,0.35); border-color: rgba(232,255,71,0.4); }
+  .hm-cell.l3 { background: rgba(232,255,71,0.6);  border-color: rgba(232,255,71,0.7); }
+  .hm-cell.l4 { background: var(--accent);         border-color: var(--accent); }
+
+  /* ── Scrollbar ── */
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+  ::-webkit-scrollbar-thumb:hover { background: #3a3a40; }
+</style>
+</head>
+<body>
+
+<!-- ══ Header ══ -->
+<header>
+  <div class="logo">Gym<span>Log</span></div>
+  <div class="header-actions">
+    <button class="btn" id="historyBtn">📚 Verlauf & Daten</button>
+    <button class="btn primary" id="newWorkoutBtn">+ Neues Training</button>
+  </div>
+</header>
+
+<!-- ══ Main ══ -->
+<div class="container">
+
+  <!-- Stats Bar -->
+  <div class="stats-bar" id="statsBar">
+    <!-- filled by JS -->
+  </div>
+
+  <!-- Letzte Trainings -->
+  <div class="section">
+    <h2>Letzte Einheiten <span class="dim">/ Klicke zum Bearbeiten</span></h2>
+    <div class="workout-log" id="workoutLog">
+      <!-- filled by JS -->
+    </div>
+  </div>
+
+  <!-- Chart + Heatmap -->
+  <div class="grid-2">
+    <div class="section">
+      <h2>Bestleistungen <span class="dim">/ PR</span></h2>
+      <div class="pr-chart">
+        <div class="pr-tabs" id="prTabs"></div>
+        <canvas id="prCanvas" height="160"></canvas>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>Trainings-Streak <span class="dim">/ 13 Wochen</span></h2>
+      <div class="pr-chart">
+        <div style="font-size:0.75rem;color:var(--muted);margin-bottom:.5rem;">
+          Jede Spalte = eine Woche · Intensität zeigt Volumen
+        </div>
+        <div class="heatmap-grid" id="heatmap"></div>
+        <div style="display:flex;align-items:center;gap:6px;margin-top:10px;font-size:0.7rem;color:var(--muted);">
+          Weniger
+          <span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:var(--card);border:1px solid var(--border)"></span>
+          <span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:rgba(232,255,71,0.15)"></span>
+          <span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:rgba(232,255,71,0.4)"></span>
+          <span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:rgba(232,255,71,0.6)"></span>
+          <span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:var(--accent)"></span>
+          Mehr
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /container -->
+
+<!-- ══ Modal: Neues/Bearbeite Training ══ -->
+<div class="overlay" id="overlay">
+  <div class="modal">
+    <h3 id="modalTitle">⚡ Neues Training</h3>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label for="wDate">Datum</label>
+        <input type="date" id="wDate" />
+      </div>
+      <div class="form-group">
+        <label for="wType">Typ</label>
+        <select id="wType">
+          <option value="Push">Push (Brust / Schultern / Trizeps)</option>
+          <option value="Pull">Pull (Rücken / Bizeps)</option>
+          <option value="Legs">Legs (Beine)</option>
+          <option value="Upper">Upper Body</option>
+          <option value="Lower">Lower Body</option>
+          <option value="Full">Full Body</option>
+          <option value="Cardio">Cardio</option>
+          <option value="Custom">Frei / Custom</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label for="wDuration">Dauer (Min.)</label>
+        <input type="number" id="wDuration" placeholder="60" min="10" max="300" />
+      </div>
+      <div class="form-group">
+        <label for="wFeeling">Gefühl (1–5)</label>
+        <select id="wFeeling">
+          <option value="5">💪 5 — Beast Mode</option>
+          <option value="4">😤 4 — Solide</option>
+          <option value="3" selected>😐 3 — OK</option>
+          <option value="2">😓 2 — Zäh</option>
+          <option value="1">💀 1 — Schlecht</option>
+        </select>
+      </div>
+    </div>
+
+    <label style="margin-bottom:.5rem;display:block;">Übungen</label>
+    <div class="exercises-list" id="exerciseList"></div>
+
+    <button class="add-ex-btn" id="addExBtn">+ Übung hinzufügen</button>
+
+    <div class="form-group" style="margin-bottom:1.25rem;">
+      <label for="wNotes">Notizen</label>
+      <textarea id="wNotes" placeholder="Wie lief es? Besonderes? Verletzungen?"></textarea>
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn" id="cancelBtn">Abbrechen</button>
+      <button class="btn primary" id="saveBtn">Speichern 💾</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ Modal: Vollständiger Verlauf & Datenverwaltung ══ -->
+<div class="overlay" id="historyOverlay">
+  <div class="modal" style="width: min(650px, 92vw);">
+    <h3>📚 Trainingsverwaltung</h3>
+    
+    <!-- Backup Sektion -->
+    <label style="margin-bottom: 0.4rem; display: block;">Daten-Backup (Lokaler Speicher)</label>
+    <div style="display: flex; gap: 0.5rem; margin-bottom: 1.5rem;">
+      <button class="btn" id="exportBtn" style="flex: 1; font-size: 0.8rem; background: #1a231a;">📥 Backup exportieren</button>
+      <button class="btn" id="importBtn" style="flex: 1; font-size: 0.8rem; background: #231a1a;">📤 Backup importieren</button>
+      <input type="file" id="importFile" style="display: none;" accept=".json" />
+    </div>
+
+    <!-- Suchfilter -->
+    <div class="form-group" style="margin-bottom: 1.25rem;">
+      <label for="historySearch">Verlauf durchsuchen</label>
+      <input type="text" id="historySearch" placeholder="Nach Übung, Typ oder Notiz filtern..." />
+    </div>
+
+    <!-- Verlaufsliste -->
+    <div class="workout-log" id="historyLog" style="max-height: 38vh; overflow-y: auto; padding-right: 4px;">
+      <!-- filled by JS -->
+    </div>
+
+    <div class="modal-actions" style="margin-top: 1.25rem;">
+      <button class="btn" id="closeHistoryBtn">Schließen</button>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script>
+// ── State ──────────────────────────────────────────────────────────────────
+const STORAGE_KEY = 'gymlog_v1';
+let editingWorkoutId = null;
+
+function loadData() {
+  try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || []; }
+  catch { return []; }
+}
+function saveData(arr) {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(arr));
+}
+
+// ── Seed data (falls leer) ──────────────────────────────────────────────────
+function seedData() {
+  const today = new Date();
+  const d = (offset) => {
+    const x = new Date(today);
+    x.setDate(x.getDate() - offset);
+    return x.toISOString().split('T')[0];
+  };
+  return [
+    {
+      id: 1, date: d(1), type: 'Push', duration: 65, feeling: 4, notes: 'Neue Bestleistung Bank!',
+      exercises: [
+        {name:'Bankdrücken',sets:'4',reps:'8',kg:'95'},
+        {name:'Schulterdrücken',sets:'4',reps:'10',kg:'60'},
+        {name:'Trizeps Pushdowns',sets:'3',reps:'12',kg:'35'},
+      ]
+    },
+    {
+      id: 2, date: d(3), type: 'Pull', duration: 55, feeling: 5, notes: 'Klimmzüge + 10kg!',
+      exercises: [
+        {name:'Klimmzüge',sets:'5',reps:'6',kg:'10'},
+        {name:'Kabelrudern',sets:'4',reps:'10',kg:'70'},
+        {name:'Bizeps Curls',sets:'3',reps:'12',kg:'25'},
+      ]
+    },
+    {
+      id: 3, date: d(5), type: 'Legs', duration: 70, feeling: 3, notes: 'Kniebeugen nach Pause.',
+      exercises: [
+        {name:'Kniebeugen',sets:'5',reps:'5',kg:'120'},
+        {name:'Beinpresse',sets:'4',reps:'10',kg:'180'},
+        {name:'Romanian Deadlift',sets:'3',reps:'10',kg:'80'},
+      ]
+    },
+    {
+      id: 4, date: d(7), type: 'Push', duration: 60, feeling: 4, notes: '',
+      exercises: [
+        {name:'Bankdrücken',sets:'4',reps:'8',kg:'90'},
+        {name:'Schulterdrücken',sets:'3',reps:'10',kg:'57.5'},
+        {name:'Schrägbankdrücken',sets:'3',reps:'10',kg:'70'},
+      ]
+    },
+    {
+      id: 5, date: d(10), type: 'Pull', duration: 50, feeling: 4, notes: '',
+      exercises: [
+        {name:'Klimmzüge',sets:'4',reps:'6',kg:'7.5'},
+        {name:'Kabelrudern',sets:'4',reps:'10',kg:'67.5'},
+        {name:'Bizeps Curls',sets:'3',reps:'12',kg:'22.5'},
+      ]
+    },
+  ];
+}
+
+let workouts = loadData();
+if (!workouts.length) { workouts = seedData(); saveData(workouts); }
+
+// ── Helpers ────────────────────────────────────────────────────────────────
+const $ = id => document.getElementById(id);
+const DAYS_DE = ['So','Mo','Di','Mi','Do','Fr','Sa'];
+const MONTHS_DE = ['Jan','Feb','Mär','Apr','Mai','Jun','Jul','Aug','Sep','Okt','Nov','Dez'];
+
+function fmtDate(dateStr) {
+  const d = new Date(dateStr + 'T00:00:00');
+  return { day: DAYS_DE[d.getDay()], num: d.getDate(), mon: MONTHS_DE[d.getMonth()] };
+}
+
+function badgeClass(type) {
+  if (type === 'Push') return 'push';
+  if (type === 'Pull') return 'pull';
+  return '';
+}
+
+function totalVolume(w) {
+  return w.exercises.reduce((s,e) => {
+    const sets = parseFloat(e.sets)||0, reps = parseFloat(e.reps)||0, kg = parseFloat(e.kg)||0;
+    return s + sets*reps*kg;
+  }, 0);
+}
+
+function streak() {
+  const today = new Date().toISOString().split('T')[0];
+  const yesterdayObj = new Date();
+  yesterdayObj.setDate(yesterdayObj.getDate() - 1);
+  const yesterday = yesterdayObj.toISOString().split('T')[0];
+
+  const sorted = [...new Set(workouts.map(w=>w.date))].sort().reverse();
+  if (!sorted.length) return 0;
+
+  if (sorted[0] !== today && sorted[0] !== yesterday) return 0;
+
+  let count = 0;
+  let cur = sorted[0];
+
+  for (const d of sorted) {
+    if (d === cur) { 
+      count++; 
+      const x = new Date(cur+'T00:00:00'); 
+      x.setDate(x.getDate()-1); 
+      cur = x.toISOString().split('T')[0]; 
+    }
+    else if (d < cur) break;
+  }
+  return count;
+}
+
+// ── Workout löschen ────────────────────────────────────────────────────────
+function deleteWorkout(id) {
+  if (confirm('Möchtest du dieses Training wirklich unwiderruflich löschen?')) {
+    workouts = workouts.filter(w => w.id !== id);
+    saveData(workouts);
+    renderAll();
+    if ($('historyOverlay').classList.contains('open')) {
+      renderHistoryLog();
+    }
+  }
+}
+
+// ── Render Stats ───────────────────────────────────────────────────────────
+function renderStats() {
+  const thisWeek = workouts.filter(w => {
+    const d = new Date(w.date+'T00:00:00');
+    const now = new Date();
+    const diff = (now - d) / 86400000;
+    return diff <= 7;
+  });
+  const vol = workouts.reduce((s,w) => s+totalVolume(w), 0);
+  const avgDur = workouts.length ? Math.round(workouts.reduce((s,w)=>s+(w.duration||0),0)/workouts.length) : 0;
+  const s = streak();
+
+  $('statsBar').innerHTML = `
+    <div class="stat-card">
+      <div class="stat-label">Diese Woche</div>
+      <div class="stat-value">${thisWeek.length}</div>
+      <div class="stat-sub">Einheiten</div>
+    </div>
+    <div class="stat-card success">
+      <div class="stat-label">Gesamt</div>
+      <div class="stat-value">${workouts.length}</div>
+      <div class="stat-sub">Trainings gesamt</div>
+    </div>
+    <div class="stat-card accent2">
+      <div class="stat-label">Streak</div>
+      <div class="stat-value">${s}</div>
+      <div class="stat-sub">Tage in Folge 🔥</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Ø Dauer</div>
+      <div class="stat-value">${avgDur}<span style="font-size:1rem;font-weight:400">min</span></div>
+      <div class="stat-sub">Pro Einheit</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Gesamtvolumen</div>
+      <div class="stat-value" style="font-size:1.5rem">${(vol/1000).toFixed(1)}<span style="font-size:0.9rem;font-weight:400">t</span></div>
+      <div class="stat-sub">Tonnen bewegt</div>
+    </div>
+  `;
+}
+
+// ── Render Workout Log (Dashboard - Letzte 8) ──────────────────────────────
+function renderLog() {
+  const sorted = [...workouts].sort((a,b)=>b.date.localeCompare(a.date)).slice(0,8);
+  $('workoutLog').innerHTML = sorted.map(w => {
+    const fd = fmtDate(w.date);
+    const exNames = w.exercises.slice(0,3).map(e=>e.name).join(', ');
+    const vol = Math.round(totalVolume(w));
+    return `<div class="workout-entry" onclick="editWorkout(${w.id})">
+      <div class="we-date">${fd.num}<small>${fd.day} ${fd.mon}</small></div>
+      <div class="we-divider"></div>
+      <div class="we-info">
+        <div class="we-title">${w.type} Day</div>
+        <div class="we-meta">
+          <span>${w.duration||'—'} Min.</span>
+          <span>${exNames}${w.exercises.length>3?'…':''}</span>
+          <span>${vol>0?vol+' kg Vol.':''}</span>
+        </div>
+      </div>
+      <div class="we-badge ${badgeClass(w.type)}">${w.type}</div>
+      <button class="delete-w-btn" title="Löschen" onclick="event.stopPropagation(); deleteWorkout(${w.id})">✕</button>
+    </div>`;
+  }).join('') || '<p style="color:var(--muted);font-size:.9rem;padding:.5rem 0;">Noch kein Training eingetragen. Leg los! 💪</p>';
+}
+
+// ── PR Chart ───────────────────────────────────────────────────────────────
+let prChart = null;
+function getExercises() {
+  const map = {};
+  workouts.forEach(w => w.exercises.forEach(e => {
+    const k = e.name.trim();
+    if (!k) return;
+    const kg = parseFloat(e.kg)||0;
+    if (!map[k]) map[k] = [];
+    map[k].push({ date: w.date, kg });
+  }));
+  return map;
+}
+
+function renderPRTabs() {
+  const exMap = getExercises();
+  const names = Object.keys(exMap);
+  const tabsEl = $('prTabs');
+  if (!names.length) { tabsEl.innerHTML = '<span style="color:var(--muted);font-size:.8rem">Noch keine Daten.</span>'; return; }
+
+  tabsEl.innerHTML = names.map((n,i) =>
+    `<button class="pr-tab ${i===0?'active':''}" data-ex="${n}">${n}</button>`
+  ).join('');
+
+  tabsEl.querySelectorAll('.pr-tab').forEach(btn => {
+    btn.addEventListener('click', () => {
+      tabsEl.querySelectorAll('.pr-tab').forEach(b=>b.classList.remove('active'));
+      btn.classList.add('active');
+      drawChart(btn.dataset.ex, exMap);
+    });
+  });
+
+  drawChart(names[0], exMap);
+}
+
+function drawChart(name, exMap) {
+  const data = (exMap[name]||[]).sort((a,b)=>a.date.localeCompare(b.date));
+  const labels = data.map(d => { const fd=fmtDate(d.date); return `${fd.num} ${fd.mon}`; });
+  const vals = data.map(d=>d.kg);
+
+  if (prChart) prChart.destroy();
+  const ctx = $('prCanvas').getContext('2d');
+  prChart = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [{
+        data: vals,
+        borderColor: '#e8ff47',
+        backgroundColor: 'rgba(232,255,71,0.08)',
+        borderWidth: 2,
+        pointBackgroundColor: '#e8ff47',
+        pointRadius: 4,
+        tension: 0.35,
+        fill: true,
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: { legend: { display: false }, tooltip: {
+        backgroundColor: '#1c1c1f',
+        borderColor: '#2a2a2e',
+        borderWidth: 1,
+        titleColor: '#e8ff47',
+        bodyColor: '#f0efe8',
+        callbacks: { label: ctx => `${ctx.parsed.y} kg` }
+      }},
+      scales: {
+        x: { ticks: { color: '#6b6b72', font: { size: 11 } }, grid: { color: '#1e1e22' } },
+        y: { ticks: { color: '#6b6b72', font: { size: 11 }, callback: v=>`${v} kg` }, grid: { color: '#1e1e22' } }
+      }
+    }
+  });
+}
+
+// ── Heatmap ────────────────────────────────────────────────────────────────
+function renderHeatmap() {
+  const dateMap = {};
+  workouts.forEach(w => {
+    dateMap[w.date] = (dateMap[w.date]||0) + (totalVolume(w)||1);
+  });
+
+  const cells = [];
+  const today = new Date();
+  
+  for (let i = 90; i >= 0; i--) {
+    const d = new Date(today);
+    d.setDate(d.getDate() - i);
+    const key = d.toISOString().split('T')[0];
+    const vol = dateMap[key] || 0;
+    let lvl = '';
+    if (vol > 10000) lvl = 'l4';
+    else if (vol > 5000) lvl = 'l3';
+    else if (vol > 0)    lvl = 'l2';
+    else if (dateMap[key] !== undefined) lvl = 'l1';
+    cells.push(`<div class="hm-cell ${lvl}" title="${key}${vol?': '+Math.round(vol/1000*10)/10+'t':''}"></div>`);
+  }
+  $('heatmap').innerHTML = cells.join('');
+}
+
+// ── Modal: Neues / Bearbeite Training ──────────────────────────────────────
+const overlay = $('overlay');
+
+function openModal(id = null) {
+  if (id) {
+    const w = workouts.find(item => item.id === id);
+    if (!w) return;
+    editingWorkoutId = id;
+    $('modalTitle').innerText = '⚡ Training bearbeiten';
+    $('saveBtn').innerText = 'Änderungen speichern 💾';
+
+    $('wDate').value = w.date;
+    $('wType').value = w.type;
+    $('wDuration').value = w.duration || '';
+    $('wFeeling').value = w.feeling || '3';
+    $('wNotes').value = w.notes || '';
+    $('exerciseList').innerHTML = '';
+    if (w.exercises && w.exercises.length) {
+      w.exercises.forEach(ex => addExerciseRow(ex));
+    } else {
+      addExerciseRow();
+    }
+  } else {
+    editingWorkoutId = null;
+    $('modalTitle').innerText = '⚡ Neues Training';
+    $('saveBtn').innerText = 'Speichern 💾';
+
+    $('wDate').value = new Date().toISOString().split('T')[0];
+    $('wType').value = 'Push';
+    $('wDuration').value = '';
+    $('wFeeling').value = '3';
+    $('wNotes').value = '';
+    $('exerciseList').innerHTML = '';
+    addExerciseRow();
+  }
+  overlay.classList.add('open');
+}
+
+function closeModal() { overlay.classList.remove('open'); }
+
+function addExerciseRow(ex={}) {
+  const row = document.createElement('div');
+  row.className = 'exercise-row';
+  row.innerHTML = `
+    <div class="form-group" style="margin:0">
+      <label>Übung</label>
+      <input type="text" class="ex-name" placeholder="z.B. Bankdrücken" value="${ex.name||''}" list="exSuggestions" />
+    </div>
+    <div class="form-group" style="margin:0">
+      <label>Sätze</label>
+      <input type="number" class="ex-sets" placeholder="4" min="1" max="20" value="${ex.sets||''}" />
+    </div>
+    <div class="form-group" style="margin:0">
+      <label>Wdh.</label>
+      <input type="number" class="ex-reps" placeholder="10" min="1" max="100" value="${ex.reps||''}" />
+    </div>
+    <div class="form-group" style="margin:0">
+      <label>Kg</label>
+      <input type="number" class="ex-kg" placeholder="80" step="0.5" value="${ex.kg||''}" />
+    </div>
+    <button class="remove-ex" title="Entfernen">✕</button>
+  `;
+  row.querySelector('.remove-ex').addEventListener('click', () => row.remove());
+  $('exerciseList').appendChild(row);
+}
+
+// Globaler Shortcut für die Inline-Event-Handler
+window.editWorkout = function(id) {
+  openModal(id);
+};
+
+$('newWorkoutBtn').addEventListener('click', () => openModal(null));
+$('cancelBtn').addEventListener('click', closeModal);
+overlay.addEventListener('click', e => { if (e.target === overlay) closeModal(); });
+$('addExBtn').addEventListener('click', () => addExerciseRow());
+
+$('saveBtn').addEventListener('click', () => {
+  const date = $('wDate').value;
+  if (!date) { alert('Bitte Datum angeben.'); return; }
+
+  const exercises = [...$('exerciseList').querySelectorAll('.exercise-row')].map(row => ({
+    name: row.querySelector('.ex-name').value.trim(),
+    sets: row.querySelector('.ex-sets').value,
+    reps: row.querySelector('.ex-reps').value,
+    kg:   row.querySelector('.ex-kg').value,
+  })).filter(e => e.name);
+
+  const wData = {
+    date,
+    type: $('wType').value,
+    duration: parseInt($('wDuration').value)||0,
+    feeling: parseInt($('wFeeling').value)||3,
+    notes: $('wNotes').value.trim(),
+    exercises,
+  };
+
+  if (editingWorkoutId) {
+    const idx = workouts.findIndex(item => item.id === editingWorkoutId);
+    if (idx !== -1) {
+      workouts[idx] = { ...workouts[idx], ...wData };
+    }
+  } else {
+    workouts.push({
+      id: Date.now(),
+      ...wData
+    });
+  }
+
+  saveData(workouts);
+  renderAll();
+  if ($('historyOverlay').classList.contains('open')) {
+    renderHistoryLog();
+  }
+  closeModal();
+});
+
+// ── Sektion: Verlauf & Daten-Management Modal ────────────────────────────────
+const historyOverlay = $('historyOverlay');
+
+function openHistoryModal() {
+  $('historySearch').value = '';
+  renderHistoryLog();
+  historyOverlay.classList.add('open');
+}
+
+function closeHistoryModal() {
+  historyOverlay.classList.remove('open');
+}
+
+function renderHistoryLog() {
+  const query = $('historySearch').value.toLowerCase().trim();
+  let filtered = [...workouts].sort((a,b) => b.date.localeCompare(a.date));
+
+  if (query) {
+    filtered = filtered.filter(w => {
+      const matchType = w.type.toLowerCase().includes(query);
+      const matchNotes = w.notes && w.notes.toLowerCase().includes(query);
+      const matchExercise = w.exercises && w.exercises.some(e => e.name.toLowerCase().includes(query));
+      return matchType || matchNotes || matchExercise;
+    });
+  }
+
+  $('historyLog').innerHTML = filtered.map(w => {
+    const fd = fmtDate(w.date);
+    const exNames = w.exercises.map(e=>e.name).join(', ');
+    const vol = Math.round(totalVolume(w));
+    return `<div class="workout-entry" onclick="editWorkout(${w.id})">
+      <div class="we-date">${fd.num}<small>${fd.day} ${fd.mon}</small></div>
+      <div class="we-divider"></div>
+      <div class="we-info">
+        <div class="we-title">${w.type} Day</div>
+        <div class="we-meta">
+          <span>${w.duration||'—'} Min.</span>
+          <span>${exNames || 'Keine Übungen'}</span>
+          <span>${vol>0?vol+' kg Vol.':''}</span>
+        </div>
+      </div>
+      <div class="we-badge ${badgeClass(w.type)}">${w.type}</div>
+      <button class="delete-w-btn" title="Löschen" onclick="event.stopPropagation(); deleteWorkout(${w.id})">✕</button>
+    </div>`;
+  }).join('') || '<p style="color:var(--muted);font-size:.9rem;padding:.5rem 0;">Keine passenden Einträge gefunden.</p>';
+}
+
+$('historyBtn').addEventListener('click', openHistoryModal);
+$('closeHistoryBtn').addEventListener('click', closeHistoryModal);
+historyOverlay.addEventListener('click', e => { if (e.target === historyOverlay) closeHistoryModal(); });
+$('historySearch').addEventListener('input', renderHistoryLog);
+
+// ── Sektion: JSON Export / Import ───────────────────────────────────────────
+$('exportBtn').addEventListener('click', () => {
+  if (!workouts.length) {
+    alert('Keine Trainingsdaten zum Exportieren vorhanden.');
+    return;
+  }
+  const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(workouts, null, 2));
+  const dlAnchor = document.createElement('a');
+  dlAnchor.setAttribute("href", dataStr);
+  dlAnchor.setAttribute("download", `gymlog_backup_${new Date().toISOString().split('T')[0]}.json`);
+  document.body.appendChild(dlAnchor);
+  dlAnchor.click();
+  dlAnchor.remove();
+});
+
+$('importBtn').addEventListener('click', () => {
+  $('importFile').click();
+});
+
+$('importFile').addEventListener('change', (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = function(evt) {
+    try {
+      const importedData = JSON.parse(evt.target.result);
+      if (Array.isArray(importedData)) {
+        if (confirm('Möchtest du alle lokalen Trainingsdaten mit diesem Backup überschreiben? (Dies kann nicht rückgängig gemacht werden)')) {
+          workouts = importedData;
+          saveData(workouts);
+          renderAll();
+          renderHistoryLog();
+          alert('Backup erfolgreich geladen! 💪');
+        }
+      } else {
+        alert('Fehler: Die Datei beinhaltet kein gültiges GymLog-Datenformat.');
+      }
+    } catch {
+      alert('Fehler beim Parsen der Datei. Bitte stelle sicher, dass es ein gültiges JSON-Backup ist.');
+    }
+    e.target.value = '';
+  };
+  reader.readAsText(file);
+});
+
+// ── Autocomplete suggestions ───────────────────────────────────────────────
+const COMMON_EX = [
+  'Bankdrücken','Schrägbankdrücken','Kurzhantel Bankdrücken','Schulterdrücken','Seitheben',
+  'Butterfly','Dips','Trizeps Pushdowns','Skull Crusher','Klimmzüge','Latzug','Kabelrudern',
+  'Rudern','Bizeps Curls','Hammer Curls','Kniebeugen','Beinpresse','Romanian Deadlift',
+  'Kreuzheben','Ausfallschritte','Beinbeuger','Beinstrecker','Wadenheben','Planks',
+  'Cable Crunch','Hyperextension','Hip Thrust','Rudern Maschine'
+];
+
+const dl = document.createElement('datalist');
+dl.id = 'exSuggestions';
+dl.innerHTML = COMMON_EX.map(e=>`<option value="${e}">`).join('');
+document.body.appendChild(dl);
+
+// ── Init ───────────────────────────────────────────────────────────────────
+function renderAll() {
+  renderStats();
+  renderLog();
+  renderPRTabs();
+  renderHeatmap();
+}
+
+renderAll();
+</script>
+</body>
+</html>
