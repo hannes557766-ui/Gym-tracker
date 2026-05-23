@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+  <meta name="theme-color" content="#2A64E5" />
+  <meta name="description" content="IronLog - Dein Trainings-Tracker" />
+  <title>IronLog</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  
+  <link rel="manifest" href="/manifest.json" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'><rect fill='%232A64E5' width='180' height='180'/><text x='50%' y='50%' dominant-baseline='middle' text-anchor='middle' font-family='system-ui' font-size='90' font-weight='bold' fill='white' dy='.3em'>IL</text></svg>" />
+  
+  <link rel="stylesheet" href="../src/styles/main.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js" defer></script>
+</head>
+<body>
+  <div id="app">
+    <!-- HOME SCREEN -->
+    <div class="screen active" id="screen-home">
+      <div class="topbar">
+        <div class="logo">Iron<em>Log</em></div>
+        <div style="display:flex;gap:6px">
+          <button class="icon-btn" id="exportBtnHome" title="Export">
+            <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+          </button>
+        </div>
+      </div>
+      <div class="streak-banner" id="streakBanner">
+        <div>
+          <div class="streak-num" id="streakNum">0</div>
+          <div class="streak-label">Tage Streak</div>
+        </div>
+        <div class="streak-fire">🔥</div>
+      </div>
+      <div class="stats-grid" id="statsGrid"></div>
+      <div class="pad" style="padding-bottom:0">
+        <div class="section-label">Diese Woche</div>
+        <div class="week-bars" id="weekBars"></div>
+        <div class="week-bar-labels" id="weekLabels"></div>
+      </div>
+      <div class="pad" style="padding-bottom:8px">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+          <div class="section-label" style="margin:0">Letzte Einheiten</div>
+          <button class="btn sm" id="seeAllBtn" style="font-size:11px;padding:4px 10px">Alle</button>
+        </div>
+      </div>
+      <div class="card" style="margin:0 20px;border-radius:var(--r)">
+        <div class="workout-list" id="recentLog"></div>
+      </div>
+      <div class="pad" style="padding-bottom:0">
+        <div class="section-label">Aktivität (90 Tage)</div>
+      </div>
+      <div class="heatmap-wrap">
+        <div class="heatmap-grid" id="heatmap"></div>
+      </div>
+    </div>
+
+    <!-- PROFILE SCREEN -->
+    <div class="screen" id="screen-profile">
+      <div class="topbar">
+        <div class="topbar-title">Profil</div>
+      </div>
+      <div class="profile-header">
+        <div class="avatar" id="avatarInitial">AT</div>
+        <div>
+          <div class="profile-name" id="profileName">Athlet</div>
+          <div class="profile-sub" id="profileSub">Mitglied seit heute</div>
+        </div>
+      </div>
+      <div class="pad" style="padding-top:0;padding-bottom:0">
+        <div class="section-label">Einstellungen</div>
+      </div>
+      <div class="card" style="margin:8px 20px;border-radius:var(--r)">
+        <div class="settings-row">
+          <div>
+            <div class="settings-label">Dunkler Modus</div>
+            <div class="settings-sub">Theme umschalten</div>
+          </div>
+          <label class="toggle">
+            <input type="checkbox" id="darkModeToggle" />
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+        <div class="settings-row">
+          <div>
+            <div class="settings-label">Name</div>
+            <div class="settings-sub" id="nameSub">Wird im Profil angezeigt</div>
+          </div>
+          <button class="btn sm" id="editNameBtn">Bearbeiten</button>
+        </div>
+        <div class="settings-row">
+          <div>
+            <div class="settings-label">Daten exportieren</div>
+            <div class="settings-sub">JSON Backup herunterladen</div>
+          </div>
+          <button class="btn sm" id="exportBtnProfile">
+            <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+          </button>
+        </div>
+        <div class="settings-row">
+          <div>
+            <div class="settings-label">Alle Daten löschen</div>
+            <div class="settings-sub">Nicht rückgängig zu machen</div>
+          </div>
+          <button class="btn sm danger" id="clearDataBtn">Löschen</button>
+        </div>
+      </div>
+      <div class="pad" style="padding-top:16px;padding-bottom:0">
+        <div class="section-label">Persönliche Rekorde</div>
+      </div>
+      <div class="card" style="margin:8px 20px;border-radius:var(--r)" id="prList"></div>
+    </div>
+  </div>
+
+  <!-- Tab Navigation -->
+  <nav class="tabbar">
+    <button class="tab-btn active" data-tab="home">
+      <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9,22 9,12 15,12 15,22"/></svg>
+      Home
+    </button>
+    <button class="tab-btn" data-tab="profile">
+      <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      Profil
+    </button>
+  </nav>
+
+  <script type="module" src="../src/js/app.js"></script>
+</body>
+</html>

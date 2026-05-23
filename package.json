@@ -1,0 +1,24 @@
+{
+  "name": "gym-tracker",
+  "version": "3.0.0",
+  "description": "IronLog - Modern fitness tracking app",
+  "type": "module",
+  "scripts": {
+    "dev": "npx http-server public -p 8000 -c-1 --cors",
+    "build": "echo 'Static site - no build needed'",
+    "start": "npx http-server public -p 8000"
+  },
+  "keywords": [
+    "fitness",
+    "workout",
+    "tracking",
+    "gym",
+    "pwa",
+    "offline"
+  ],
+  "author": "Hannes",
+  "license": "MIT",
+  "devDependencies": {
+    "http-server": "^14.1.1"
+  }
+}
