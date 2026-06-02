@@ -1,0 +1,37 @@
+[
+  {
+    "id": "bb-bench-press",
+    "name": "Barbell Bench Press",
+    "muscle": "Chest",
+    "gifUrl": "https://raw.githubusercontent.com/hasaneyldrm/exercises-dataset/main/videos/0025.gif",
+    "equipment": "Barbell"
+  },
+  {
+    "id": "bb-deadlift",
+    "name": "Barbell Deadlift",
+    "muscle": "Back",
+    "gifUrl": "https://raw.githubusercontent.com/hasaneyldrm/exercises-dataset/main/videos/0032.gif",
+    "equipment": "Barbell"
+  },
+  {
+    "id": "bb-back-squat",
+    "name": "Barbell Full Squat",
+    "muscle": "Legs",
+    "gifUrl": "https://raw.githubusercontent.com/hasaneyldrm/exercises-dataset/main/videos/0043.gif",
+    "equipment": "Barbell"
+  },
+  {
+    "id": "pull-up",
+    "name": "Pull-up",
+    "muscle": "Back",
+    "gifUrl": "https://raw.githubusercontent.com/hasaneyldrm/exercises-dataset/main/videos/0652.gif",
+    "equipment": "Bodyweight"
+  },
+  {
+    "id": "db-bicep-curl",
+    "name": "Dumbbell Bicep Curl",
+    "muscle": "Biceps",
+    "gifUrl": "https://raw.githubusercontent.com/hasaneyldrm/exercises-dataset/main/videos/0285.gif",
+    "equipment": "Dumbbells"
+  }
+]
