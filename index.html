@@ -19,97 +19,116 @@
         .input-field { background-color: #F2F2F7; border-radius: 12px; padding: 12px 16px; width: 100%; border: none; outline: none; }
         .filter-chip { padding: 8px 16px; border-radius: 14px; background: #E5E5EA; font-size: 12px; font-weight: 600; color: #8E8E93; white-space: nowrap; cursor: pointer; transition: all 0.2s; }
         .filter-chip.active { background: var(--system-blue); color: white; }
-        .nav-item { color: #8E8E93; }
-        .nav-item.active { color: var(--system-blue); }
         .no-scrollbar::-webkit-scrollbar { display: none; }
         input[type="number"] { -moz-appearance: textfield; background: transparent; }
         input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; }
+        .gif-container { background: #fdfdfd; mix-blend-mode: multiply; }
     </style>
 </head>
 <body class="pb-32">
 
+    <!-- Auth Screen -->
     <div id="auth-screen" class="fixed inset-0 z-[100] bg-white flex flex-col items-center justify-center px-10 space-y-8 hidden">
         <div class="text-center">
             <h1 class="text-4xl font-bold tracking-tighter">GNTK</h1>
-            <p class="text-gray-400 font-medium mt-1">Minimalist Gym Tracker</p>
+            <p class="text-gray-400 font-medium mt-1">Dein minimalistischer Gym-Tracker</p>
         </div>
         <div class="w-full max-w-sm space-y-4">
             <input type="email" id="auth-email" placeholder="E-Mail" class="input-field">
             <input type="password" id="auth-password" placeholder="Passwort" class="input-field">
-            <div class="flex space-x-3">
-                <button onclick="handleSignIn()" class="btn-primary flex-1 py-4 rounded-xl font-bold">Login</button>
-                <button onclick="handleSignUp()" class="bg-gray-100 flex-1 py-4 rounded-xl font-bold text-gray-600">Registrieren</button>
-            </div>
+            <button onclick="handleSignIn()" class="btn-primary w-full py-4 rounded-xl font-bold">Login</button>
+            <button onclick="handleSignUp()" class="w-full py-4 rounded-xl font-bold text-gray-400">Account erstellen</button>
             <p id="auth-error" class="text-red-500 text-xs text-center hidden"></p>
         </div>
     </div>
 
+    <!-- Header -->
     <header id="main-header" class="px-6 pt-12 pb-6">
         <p class="text-[11px] font-bold uppercase tracking-widest text-gray-400 mb-1" id="current-date"></p>
-        <h1 id="header-title" class="text-3xl font-bold tracking-tight">Übersicht</h1>
+        <h1 id="header-title" class="text-3xl font-bold tracking-tight">Training</h1>
     </header>
 
     <main id="app" class="px-6">
+        <!-- HOME SCREEN -->
         <div id="home-screen" class="space-y-8">
-            <button onclick="startNewWorkout()" class="btn-primary w-full py-5 rounded-2xl font-bold text-lg shadow-sm">Neues Training</button>
+            <button onclick="startNewWorkout()" class="btn-primary w-full py-6 rounded-2xl font-bold text-xl shadow-lg">Neues Training</button>
             <section>
-                <h2 class="text-[13px] font-bold text-gray-400 uppercase tracking-wider mb-4 ml-1">Dein Verlauf</h2>
+                <h2 class="text-[13px] font-bold text-gray-400 uppercase tracking-wider mb-4 ml-1">Letzte Einheiten</h2>
                 <div id="history-list" class="space-y-3"></div>
             </section>
         </div>
 
+        <!-- PROFILE SCREEN -->
         <div id="profile-screen" class="hidden space-y-8">
             <div class="card p-6 flex items-center space-x-4">
                 <div class="w-16 h-16 bg-blue-50 rounded-full flex items-center justify-center text-blue-600 text-2xl font-bold" id="profile-initials">?</div>
                 <div><h2 class="text-xl font-bold" id="profile-name">Athlet</h2><p class="text-gray-400 text-sm" id="profile-email"></p></div>
             </div>
             <div class="grid grid-cols-2 gap-4">
-                <div class="card p-5 text-center"><p class="text-[10px] font-bold text-gray-400 uppercase mb-1">Einheiten</p><p class="text-2xl font-bold" id="stat-count">0</p></div>
+                <div class="card p-5 text-center"><p class="text-[10px] font-bold text-gray-400 uppercase mb-1">Trainings</p><p class="text-2xl font-bold" id="stat-count">0</p></div>
                 <div class="card p-5 text-center"><p class="text-[10px] font-bold text-gray-400 uppercase mb-1">Volumen</p><p class="text-2xl font-bold" id="stat-volume">0 <span class="text-sm font-normal text-gray-400">kg</span></p></div>
             </div>
             <section class="space-y-4">
-                <h2 class="text-[13px] font-bold text-gray-400 uppercase ml-1">Einstellungen</h2>
+                <h2 class="text-[13px] font-bold text-gray-400 uppercase ml-1">Optionen</h2>
                 <div class="card overflow-hidden">
-                    <div class="flex items-center justify-between p-4 border-b border-gray-50"><span class="text-sm font-medium">Pausen-Dauer (sek)</span><input type="number" id="setting-rest" value="60" onchange="saveSettings()" class="w-12 text-right font-bold text-blue-600 outline-none"></div>
-                    <div class="flex items-center justify-between p-4 border-b border-gray-50"><span class="text-sm font-medium">Dein Name</span><input type="text" id="setting-name" onchange="saveSettings()" class="w-32 text-right font-bold text-blue-600 outline-none"></div>
-                    <button onclick="handleSignOut()" class="w-full p-4 text-left text-red-500 text-sm font-bold bg-red-50/50">Abmelden</button>
+                    <button onclick="handleSignOut()" class="w-full p-4 text-left text-red-500 text-sm font-bold bg-red-50/30">Abmelden</button>
                 </div>
             </section>
         </div>
 
+        <!-- ACTIVE WORKOUT -->
         <div id="workout-screen" class="hidden space-y-6 pb-20">
             <div class="flex justify-between items-end">
                 <div><span id="workout-timer" class="text-2xl font-bold tabular-nums">00:00</span><p class="text-gray-400 text-sm font-medium">Session läuft</p></div>
-                <button onclick="finishWorkout()" class="bg-gray-100 px-5 py-2.5 rounded-full font-bold text-sm">Beenden</button>
+                <button onclick="finishWorkout()" class="bg-gray-100 px-6 py-2.5 rounded-full font-bold text-sm">Beenden</button>
             </div>
             <div id="active-exercises" class="space-y-6"></div>
-            <button onclick="showExercisePicker()" class="w-full py-4 rounded-2xl border-2 border-dashed border-gray-200 text-gray-400 font-semibold hover:bg-white transition">+ Übung hinzufügen</button>
+            <button onclick="showExercisePicker()" class="w-full py-5 rounded-2xl border-2 border-dashed border-gray-200 text-gray-400 font-bold hover:bg-white transition">+ Übung hinzufügen</button>
         </div>
     </main>
 
+    <!-- Navigation -->
     <nav id="bottom-nav" class="fixed bottom-8 left-6 right-6 h-16 bg-white/90 backdrop-blur-md rounded-2xl border border-white shadow-xl flex justify-around items-center px-4 z-40">
-        <button onclick="navigateTo('home')" id="nav-home" class="nav-item active p-3"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg></button>
-        <button onclick="navigateTo('profile')" id="nav-profile" class="nav-item p-3"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg></button>
+        <button onclick="navigateTo('home')" class="p-3 text-gray-400" id="nav-home-btn"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg></button>
+        <button onclick="navigateTo('profile')" class="p-3 text-gray-400" id="nav-profile-btn"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg></button>
     </nav>
 
+    <!-- Picker Modal -->
     <div id="picker-modal" class="fixed inset-0 z-[110] hidden bg-white flex flex-col">
-        <header class="p-6 flex justify-between items-center"><h2 class="text-2xl font-bold">Übung wählen</h2><button onclick="hideExercisePicker()" class="text-gray-400 text-3xl">&times;</button></header>
+        <header class="p-6 flex justify-between items-center"><h2 class="text-2xl font-bold">Übung wählen</h2><button onclick="hideExercisePicker()" class="text-gray-400 text-4xl">&times;</button></header>
         <div class="px-6 mb-4 space-y-4">
-            <input type="text" id="exercise-search" placeholder="Suche..." class="w-full bg-gray-100 rounded-xl px-5 py-3 outline-none focus:ring-2 focus:ring-blue-500/10 transition">
-            <div class="space-y-3">
-                <div class="flex overflow-x-auto space-x-2 pb-1 no-scrollbar" id="muscle-filters"></div>
-                <div class="flex overflow-x-auto space-x-2 pb-1 no-scrollbar" id="equip-filters"></div>
-            </div>
+            <input type="text" id="exercise-search" placeholder="Suchen..." class="w-full bg-gray-100 rounded-xl px-5 py-3 outline-none">
+            <div class="flex overflow-x-auto space-x-2 no-scrollbar" id="muscle-filters"></div>
+            <div class="flex overflow-x-auto space-x-2 no-scrollbar" id="equip-filters"></div>
         </div>
         <div id="picker-list" class="flex-1 overflow-y-auto px-6 space-y-3 pb-20"></div>
     </div>
 
-    <div id="history-modal" class="fixed inset-0 z-[120] hidden bg-white flex flex-col">
-        <header class="p-6 flex justify-between items-center"><h2 id="history-detail-date" class="text-xl font-bold">Details</h2><button onclick="hideHistoryDetail()" class="text-gray-400 text-3xl">&times;</button></header>
-        <div id="history-detail-content" class="flex-1 overflow-y-auto px-6 space-y-6 pb-10"></div>
+    <!-- Detail/Animation Modal -->
+    <div id="detail-modal" class="fixed inset-0 z-[130] hidden flex items-center justify-center p-6">
+        <div class="absolute inset-0 bg-white/95 backdrop-blur-md" onclick="hideDetail()"></div>
+        <div class="card w-full max-w-sm relative overflow-hidden shadow-2xl">
+            <div class="p-6">
+                <div class="flex justify-between items-start mb-6">
+                    <h2 id="detail-title" class="text-xl font-bold pr-4">Übung</h2>
+                    <button onclick="hideDetail()" class="text-gray-300 text-3xl">&times;</button>
+                </div>
+                <div class="rounded-2xl overflow-hidden bg-gray-50 aspect-square flex items-center justify-center">
+                    <img id="detail-gif" src="" class="w-full h-full object-cover mix-blend-multiply">
+                </div>
+                <p class="text-gray-400 text-center text-sm mt-6">Achte auf eine kontrollierte Ausführung.</p>
+            </div>
+        </div>
     </div>
 
-    <div id="rest-timer-overlay" class="fixed bottom-28 left-1/2 -translate-x-1/2 bg-white border border-gray-100 px-8 py-4 rounded-2xl shadow-2xl z-50 hidden flex items-center space-x-4">
+    <!-- History Detail -->
+    <div id="history-modal" class="fixed inset-0 z-[120] hidden bg-white flex flex-col">
+        <header class="p-6 flex justify-between items-center"><h2 id="history-detail-date" class="text-xl font-bold">Details</h2><button onclick="hideHistoryDetail()" class="text-gray-400 text-4xl">&times;</button></header>
+        <div id="history-detail-content" class="flex-1 overflow-y-auto px-6 space-y-6 pb-20"></div>
+    </div>
+
+    <!-- Rest Timer -->
+    <div id="rest-timer-overlay" class="fixed bottom-28 left-1/2 -translate-x-1/2 bg-white border border-gray-100 px-8 py-4 rounded-3xl shadow-2xl z-50 hidden flex items-center space-x-4">
         <div class="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
         <span id="rest-time" class="text-2xl font-bold tabular-nums text-blue-500">60</span>
     </div>
@@ -122,7 +141,6 @@
 
         let currentUser = null, activeWorkout = null, workoutTimerInterval = null, restTimerInterval = null;
         let selectedMuscle = null, selectedEquip = null, pickerResults = [], searchTimeout = null;
-        let settings = { restDuration: 60, name: '' }, historyData = [];
 
         async function checkSession() {
             const { data: { session } } = await db.auth.getSession();
@@ -133,8 +151,6 @@
         function handleAuthStateChange(session) {
             if (session) {
                 currentUser = session.user;
-                settings.name = currentUser.user_metadata.full_name || '';
-                settings.restDuration = currentUser.user_metadata.rest_duration || 60;
                 document.getElementById('auth-screen').classList.add('hidden');
                 updateUI();
                 renderHistory();
@@ -149,7 +165,7 @@
                 email: document.getElementById('auth-email').value, 
                 password: document.getElementById('auth-password').value 
             });
-            if (error) { document.getElementById('auth-error').textContent = error.message; document.getElementById('auth-error').classList.remove('hidden'); }
+            if (error) alert(error.message);
         }
 
         async function handleSignUp() {
@@ -157,38 +173,30 @@
                 email: document.getElementById('auth-email').value, 
                 password: document.getElementById('auth-password').value 
             });
-            if (error) alert(error.message);
-            else alert('Erfolgreich registriert! Bitte logge dich jetzt ein.');
+            if (error) alert(error.message); else alert('Check Mail!');
         }
 
         async function handleSignOut() { await db.auth.signOut(); window.location.reload(); }
 
-        async function saveSettings() {
-            settings.restDuration = parseInt(document.getElementById('setting-rest').value) || 60;
-            settings.name = document.getElementById('setting-name').value;
-            await db.auth.updateUser({ data: { full_name: settings.name, rest_duration: settings.restDuration } });
-            updateUI();
-        }
-
         function updateUI() {
             document.getElementById('current-date').textContent = new Date().toLocaleDateString('de-DE', { weekday: 'long', day: 'numeric', month: 'long' }).toUpperCase();
             document.getElementById('profile-email').textContent = currentUser.email;
-            document.getElementById('profile-name').textContent = settings.name || 'Athlet';
-            document.getElementById('profile-initials').textContent = (settings.name || currentUser.email).charAt(0).toUpperCase();
+            document.getElementById('profile-initials').textContent = currentUser.email.charAt(0).toUpperCase();
         }
 
         function navigateTo(screen) {
             document.getElementById('home-screen').classList.toggle('hidden', screen !== 'home');
             document.getElementById('profile-screen').classList.toggle('hidden', screen !== 'profile');
-            document.getElementById('nav-home').classList.toggle('active', screen === 'home');
-            document.getElementById('nav-profile').classList.toggle('active', screen === 'profile');
-            document.getElementById('header-title').textContent = screen === 'home' ? 'Übersicht' : 'Profil';
+            document.getElementById('nav-home-btn').classList.toggle('text-blue-500', screen === 'home');
+            document.getElementById('nav-profile-btn').classList.toggle('text-blue-500', screen === 'profile');
         }
 
         function startNewWorkout() {
             activeWorkout = { startTime: new Date(), exercises: [] };
-            ['home-screen','profile-screen','bottom-nav','main-header'].forEach(id => document.getElementById(id).classList.add('hidden'));
+            document.getElementById('home-screen').classList.add('hidden');
             document.getElementById('workout-screen').classList.remove('hidden');
+            document.getElementById('main-header').classList.add('hidden');
+            document.getElementById('bottom-nav').classList.add('hidden');
             startTimer();
         }
 
@@ -200,14 +208,14 @@
             }, 1000);
         }
 
-        const musclesGer = ["Brust", "Rücken", "Beine", "Schultern", "Arme", "Bauch", "Ganzkörper"];
-        const equipGer = ["Langhantel", "Kurzhantel", "Maschine", "Kabelzug", "Eigengewicht", "Band", "Kettlebell"];
+        const muscles = ["Brust", "Rücken", "Beine", "Schultern", "Arme", "Bauch", "Ganzkörper"];
+        const equips = ["Langhantel", "Kurzhantel", "Maschine", "Kabelzug", "Eigengewicht", "Band", "Kettlebell"];
 
         function renderFilters() {
-            document.getElementById('muscle-filters').innerHTML = musclesGer.map(m => `
+            document.getElementById('muscle-filters').innerHTML = muscles.map(m => `
                 <div class="filter-chip ${selectedMuscle === m ? 'active' : ''}" onclick="toggleFilter('muscle', '${m}')">${m}</div>
             `).join('');
-            document.getElementById('equip-filters').innerHTML = equipGer.map(e => `
+            document.getElementById('equip-filters').innerHTML = equips.map(e => `
                 <div class="filter-chip ${selectedEquip === e ? 'active' : ''}" onclick="toggleFilter('equip', '${e}')">${e}</div>
             `).join('');
         }
@@ -231,37 +239,28 @@
             if (query) q = q.ilike('name', `%${query}%`);
             if (selectedMuscle) q = q.eq('muscle', selectedMuscle);
             if (selectedEquip) q = q.eq('equipment', selectedEquip);
-            
-            const { data, error } = await q.order('name').limit(40);
-            if (error) console.error(error);
+            const { data } = await q.order('name').limit(50);
             pickerResults = data || [];
             renderPickerResults();
         }
 
         function renderPickerResults() {
             const list = document.getElementById('picker-list');
-            if (pickerResults.length === 0) {
-                list.innerHTML = '<p class="text-center text-gray-400 mt-10 text-sm">Keine Übungen gefunden.</p>';
-                return;
-            }
+            if (pickerResults.length === 0) { list.innerHTML = '<p class="text-center text-gray-400 mt-10">Keine Übung gefunden.</p>'; return; }
             list.innerHTML = pickerResults.map((ex, i) => `
                 <div class="card p-4 flex items-center justify-between active:scale-[0.98] transition-transform" onclick="addExercise(${i})">
                     <div class="flex items-center space-x-4">
-                        <div class="w-12 h-12 rounded-xl bg-gray-50 flex items-center justify-center overflow-hidden">
+                        <div class="w-12 h-12 rounded-xl bg-gray-50 overflow-hidden flex items-center justify-center">
                             <img src="${ex.gif_url}" class="w-full h-full object-cover mix-blend-multiply">
                         </div>
-                        <div>
-                            <div class="font-bold text-[14px]">${ex.name}</div>
-                            <div class="text-[11px] text-gray-400 font-medium">${ex.muscle} • ${ex.equipment}</div>
-                        </div>
+                        <div class="font-bold text-[14px]">${ex.name}</div>
                     </div>
                 </div>
             `).join('');
         }
 
         function addExercise(idx) {
-            const ex = pickerResults[idx];
-            activeWorkout.exercises.push({ ...ex, sets: [{ weight: '', reps: '', done: false }] });
+            activeWorkout.exercises.push({ ...pickerResults[idx], sets: [{ weight: '', reps: '', done: false }] });
             hideExercisePicker();
             renderActiveWorkout();
         }
@@ -269,51 +268,48 @@
         function renderActiveWorkout() {
             const container = document.getElementById('active-exercises');
             container.innerHTML = activeWorkout.exercises.map((ex, exIdx) => `
-                <div class="card p-5 space-y-4 shadow-sm">
-                    <div class="flex items-center justify-between">
-                        <div class="flex items-center space-x-3">
-                            <div class="w-8 h-8 rounded-lg bg-gray-50 overflow-hidden"><img src="${ex.gif_url}" class="w-full h-full object-cover mix-blend-multiply"></div>
+                <div class="card p-5 space-y-4">
+                    <div class="flex justify-between items-center">
+                        <div class="flex items-center space-x-3" onclick="showDetail('${ex.gif_url}', '${ex.name}')">
+                            <div class="w-10 h-10 rounded-lg bg-gray-50 overflow-hidden"><img src="${ex.gif_url}" class="w-full h-full object-cover mix-blend-multiply"></div>
                             <h3 class="font-bold text-blue-600 text-[15px]">${ex.name}</h3>
                         </div>
-                        <button onclick="removeExercise(${exIdx})" class="text-gray-300"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg></button>
+                        <button onclick="activeWorkout.exercises.splice(${exIdx},1); renderActiveWorkout();" class="text-gray-300">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" stroke-width="2"></path></svg>
+                        </button>
                     </div>
                     <table class="w-full text-center">
                         <tr class="text-[10px] text-gray-300 font-bold uppercase tracking-widest">
-                            <td class="text-left">Satz</td><td>kg</td><td>Wdh</td><td class="text-right">Ok</td>
+                            <td class="text-left">Satz</td><td>kg</td><td>Reps</td><td class="text-right">Ok</td>
                         </tr>
                         ${ex.sets.map((s, sIdx) => `
-                            <tr class="${s.done ? 'opacity-30' : ''} transition-opacity">
-                                <td class="text-left font-bold text-gray-400 text-[13px]">${sIdx+1}</td>
-                                <td><input type="number" value="${s.weight}" placeholder="0" oninput="updateActiveSet(${exIdx}, ${sIdx}, 'weight', this.value)" class="w-12 py-2 font-bold outline-none text-center"></td>
-                                <td><input type="number" value="${s.reps}" placeholder="0" oninput="updateActiveSet(${exIdx}, ${sIdx}, 'reps', this.value)" class="w-12 py-2 font-bold outline-none text-center"></td>
+                            <tr class="${s.done ? 'opacity-30' : ''}">
+                                <td class="text-left font-bold text-gray-400">${sIdx+1}</td>
+                                <td><input type="number" value="${s.weight}" placeholder="0" oninput="activeWorkout.exercises[${exIdx}].sets[${sIdx}].weight=this.value" class="w-12 py-2 font-bold outline-none text-center"></td>
+                                <td><input type="number" value="${s.reps}" placeholder="0" oninput="activeWorkout.exercises[${exIdx}].sets[${sIdx}].reps=this.value" class="w-12 py-2 font-bold outline-none text-center"></td>
                                 <td class="text-right"><input type="checkbox" ${s.done ? 'checked' : ''} onchange="toggleSet(${exIdx}, ${sIdx})" class="custom-checkbox"></td>
                             </tr>
                         `).join('')}
                     </table>
-                    <button onclick="addSet(${exIdx})" class="w-full py-3 bg-gray-50 rounded-xl text-[11px] font-bold text-gray-400 hover:bg-gray-100 transition">+ Satz hinzufügen</button>
+                    <button onclick="addSet(${exIdx})" class="w-full py-3 bg-gray-50 rounded-xl text-[11px] font-bold text-gray-400">+ Satz</button>
                 </div>
             `).join('');
         }
 
-        function updateActiveSet(exIdx, sIdx, field, val) { activeWorkout.exercises[exIdx].sets[sIdx][field] = val; }
-        function removeExercise(idx) { activeWorkout.exercises.splice(idx, 1); renderActiveWorkout(); }
-
         function toggleSet(exIdx, sIdx) {
-            const done = !activeWorkout.exercises[exIdx].sets[sIdx].done;
-            activeWorkout.exercises[exIdx].sets[sIdx].done = done;
-            if (done) startRestTimer();
+            activeWorkout.exercises[exIdx].sets[sIdx].done = !activeWorkout.exercises[exIdx].sets[sIdx].done;
+            if (activeWorkout.exercises[exIdx].sets[sIdx].done) startRestTimer();
             renderActiveWorkout();
         }
 
         function startRestTimer() {
             clearInterval(restTimerInterval);
             const overlay = document.getElementById('rest-timer-overlay');
-            const timeEl = document.getElementById('rest-time');
             overlay.classList.remove('hidden');
-            let left = settings.restDuration;
-            timeEl.textContent = left;
+            let left = 60;
+            document.getElementById('rest-time').textContent = left;
             restTimerInterval = setInterval(() => {
-                left--; timeEl.textContent = left;
+                left--; document.getElementById('rest-time').textContent = left;
                 if (left <= 0) { clearInterval(restTimerInterval); overlay.classList.add('hidden'); }
             }, 1000);
         }
@@ -326,62 +322,45 @@
 
         async function finishWorkout() {
             if (activeWorkout.exercises.length === 0) return location.reload();
-            if (!confirm('Training in der Cloud speichern?')) return;
-            try {
-                const { data, error } = await db.from('workouts').insert([{ user_id: currentUser.id, name: 'Training' }]).select();
-                if (error) throw error;
-                const wId = data[0].id;
-                const sets = [];
-                activeWorkout.exercises.forEach(ex => ex.sets.forEach((s, i) => {
-                    if (s.done) sets.push({ workout_id: wId, exercise_id: ex.id, weight: parseFloat(s.weight)||0, reps: parseInt(s.reps)||0, set_order: i });
-                }));
-                if (sets.length > 0) await db.from('sets').insert(sets);
-                location.reload();
-            } catch (err) { console.error(err); alert("Fehler beim Speichern!"); }
+            const { data } = await db.from('workouts').insert([{ user_id: currentUser.id, name: 'Training' }]).select();
+            const sets = [];
+            activeWorkout.exercises.forEach(ex => ex.sets.forEach((s, i) => {
+                if (s.done) sets.push({ workout_id: data[0].id, exercise_id: ex.id, weight: parseFloat(s.weight)||0, reps: parseInt(s.reps)||0, set_order: i });
+            }));
+            if (sets.length > 0) await db.from('sets').insert(sets);
+            location.reload();
         }
 
         async function renderHistory() {
+            const { data } = await db.from('workouts').select('*, sets(*)').eq('user_id', currentUser.id).order('start_time', { ascending: false });
             const list = document.getElementById('history-list');
-            list.innerHTML = '<p class="text-center text-gray-400 py-10 text-sm">Lade deinen Verlauf...</p>';
-            const { data, error } = await db.from('workouts').select('*, sets(*, exercises(*))').eq('user_id', currentUser.id).order('start_time', { ascending: false });
-            if (error) { list.innerHTML = '<p class="text-red-500 text-center">Ladefehler.</p>'; return; }
-            historyData = data || [];
+            if (!data || data.length === 0) { list.innerHTML = '<p class="text-center text-gray-400 py-10">Noch kein Training.</p>'; return; }
             
-            let totalVol = 0;
-            historyData.forEach(w => w.sets.forEach(s => totalVol += (parseFloat(s.weight) * parseInt(s.reps))));
-            document.getElementById('stat-count').textContent = historyData.length;
+            let totalVol = 0; data.forEach(w => w.sets.forEach(s => totalVol += (parseFloat(s.weight) * parseInt(s.reps))));
+            document.getElementById('stat-count').textContent = data.length;
             document.getElementById('stat-volume').innerHTML = `${Math.round(totalVol)} <span class="text-sm font-normal text-gray-400">kg</span>`;
 
-            if (historyData.length === 0) {
-                list.innerHTML = '<div class="card p-10 text-center"><p class="text-gray-400 text-sm">Noch keine Trainings gespeichert.</p></div>';
-                return;
-            }
-
-            list.innerHTML = historyData.map((w, idx) => `
-                <div class="card p-5 flex justify-between items-center active:scale-[0.98] transition-transform" onclick="showHistoryDetail(${idx})">
-                    <div>
-                        <div class="font-bold text-[15px]">${new Date(w.start_time).toLocaleDateString('de-DE', {day:'2-digit',month:'2-digit'})} • Training</div>
-                        <div class="text-[12px] text-gray-400 font-medium">${w.sets.length} Sätze absolviert</div>
-                    </div>
-                    <svg class="w-4 h-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+            list.innerHTML = data.map((w, idx) => `
+                <div class="card p-5 flex justify-between items-center" onclick="showHistoryDetail(${JSON.stringify(w).replace(/"/g, '&quot;')})">
+                    <div><div class="font-bold text-[15px]">${new Date(w.start_time).toLocaleDateString('de-DE')} • Training</div><div class="text-[12px] text-gray-400">${w.sets.length} Sätze</div></div>
+                    <svg class="w-4 h-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7" stroke-width="2"></path></svg>
                 </div>
             `).join('');
         }
 
-        function showHistoryDetail(idx) {
-            const w = historyData[idx];
-            document.getElementById('history-detail-date').textContent = new Date(w.start_time).toLocaleDateString('de-DE', {weekday:'long', day:'2-digit', month:'long'});
-            const content = document.getElementById('history-detail-content');
+        async function showHistoryDetail(w) {
+            document.getElementById('history-detail-date').textContent = new Date(w.start_time).toLocaleDateString('de-DE', {weekday:'long', day:'numeric', month:'long'});
+            const { data: sets } = await db.from('sets').select('*, exercises(*)').eq('workout_id', w.id).order('created_at');
             const exInW = {};
-            w.sets.forEach(s => {
-                if (!exInW[s.exercise_id]) exInW[s.exercise_id] = { name: (s.exercises ? s.exercises.name : 'Unbekannte Übung'), sets: [] };
+            sets.forEach(s => {
+                if (!exInW[s.exercise_id]) exInW[s.exercise_id] = { name: s.exercises.name, sets: [] };
                 exInW[s.exercise_id].sets.push(s);
             });
-            content.innerHTML = Object.values(exInW).map(ex => `
+            document.getElementById('history-detail-content').innerHTML = Object.values(exInW).map(ex => `
                 <div class="space-y-2">
-                    <h3 class="font-bold text-blue-600 text-[15px]">${ex.name}</h3>
+                    <h3 class="font-bold text-blue-600">${ex.name}</h3>
                     <div class="card p-4 space-y-2">
-                        ${ex.sets.map((s, i) => `<div class="flex justify-between text-[13px]"><span class="text-gray-400 font-medium">Satz ${i+1}</span><span class="font-bold">${s.weight}kg × ${s.reps}</span></div>`).join('')}
+                        ${ex.sets.map((s, i) => `<div class="flex justify-between text-sm"><span class="text-gray-400 font-medium">Satz ${i+1}</span><span class="font-bold">${s.weight}kg × ${s.reps}</span></div>`).join('')}
                     </div>
                 </div>
             `).join('');
@@ -389,6 +368,8 @@
         }
 
         function hideHistoryDetail() { document.getElementById('history-modal').classList.add('hidden'); }
+        function showDetail(url, name) { document.getElementById('detail-title').textContent = name; document.getElementById('detail-gif').src = url; document.getElementById('detail-modal').classList.remove('hidden'); }
+        function hideDetail() { document.getElementById('detail-modal').classList.add('hidden'); }
 
         document.getElementById('exercise-search').addEventListener('input', e => {
             clearTimeout(searchTimeout);
@@ -397,5 +378,5 @@
 
         checkSession();
     </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a058dee3ca46651d',t:'MTc4MDQyODYwNg=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a058eea49dcf651d',t:'MTc4MDQyOTI1MQ=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
