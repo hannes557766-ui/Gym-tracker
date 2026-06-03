@@ -2,550 +2,413 @@
 <html lang="de">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>GNTK - Pro Gym v3</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>GNTK STUDIO</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&display=swap" rel="stylesheet">
     <style>
-        :root { --system-blue: #007AFF; --system-bg: #F2F2F7; --card-bg: #FFFFFF; }
-        body { background-color: var(--system-bg); color: #1C1C1E; font-family: 'Inter', sans-serif; -webkit-font-smoothing: antialiased; overflow-x: hidden; }
-        .card { background: var(--card-bg); border-radius: 20px; border: 1px solid rgba(0,0,0,0.05); }
-        .btn-primary { background-color: var(--system-blue); color: white; transition: all 0.2s ease; }
-        .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
-        .custom-checkbox { width: 28px; height: 28px; border-radius: 10px; border: 2px solid #E5E5EA; appearance: none; cursor: pointer; position: relative; transition: all 0.2s; }
-        .custom-checkbox:checked { background-color: #34C759; border-color: #34C759; }
-        .custom-checkbox:checked::after { content: '✓'; color: white; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-weight: bold; font-size: 16px; }
-        .filter-chip { padding: 8px 16px; border-radius: 14px; background: #E5E5EA; font-size: 11px; font-weight: 600; color: #8E8E93; white-space: nowrap; cursor: pointer; border: none; }
-        .filter-chip.active { background: var(--system-blue); color: white; }
-        .type-indicator { width: 24px; height: 24px; border-radius: 6px; display: flex; items-center; justify-content: center; font-size: 10px; font-weight: 800; cursor: pointer; }
-        .type-N { background: #F2F2F7; color: #8E8E93; }
-        .type-W { background: #FFF9C4; color: #B71C1C; }
-        .type-D { background: #E1F5FE; color: #0277BD; }
-        .type-F { background: #FFEBEE; color: #C62828; }
-        .nav-item { color: #8E8E93; transition: all 0.2s; background: none; border: none; }
-        .nav-item.active { color: var(--system-blue); }
-        .cal-day { width: 42px; height: 58px; display: flex; flex-direction: column; align-items: center; justify-content: center; border-radius: 14px; font-size: 12px; flex-shrink: 0; }
-        .cal-active { background: var(--system-blue); color: white; }
-        input[type="number"] { -moz-appearance: textfield; background: transparent; }
-        input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; }
-        .chat-bubble { max-width: 85%; padding: 12px 16px; border-radius: 18px; font-size: 14px; line-height: 1.5; margin-bottom: 8px; }
-        .chat-user { background: var(--system-blue); color: white; border-bottom-right-radius: 4px; align-self: flex-end; }
-        .chat-coach { background: white; color: #1C1C1E; border-bottom-left-radius: 4px; border: 1px solid rgba(0,0,0,0.05); align-self: flex-start; }
-        .loading-shimmer { animation: shimmer 1.5s infinite linear; background: linear-gradient(90deg, #F2F2F7 0%, #E5E5EA 50%, #F2F2F7 100%); background-size: 200% 100%; }
-        @keyframes shimmer { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
+        :root {
+            --accent: #7000FF;
+            --bg: #FFFFFF;
+            --surface: #F8F8FA;
+            --text-main: #000000;
+            --text-muted: #88888E;
+        }
+        
+        body { 
+            background-color: var(--bg); 
+            color: var(--text-main); 
+            font-family: 'Inter', -apple-system, sans-serif;
+            -webkit-font-smoothing: antialiased;
+            letter-spacing: -0.02em;
+        }
+
+        /* Typography Scaling */
+        h1 { font-weight: 900; letter-spacing: -0.05em; }
+        .meta-label { font-size: 10px; font-weight: 700; letter-spacing: 0.1em; color: var(--text-muted); text-transform: uppercase; }
+
+        /* Custom UI Elements */
+        .glass-nav { 
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: saturate(180%) blur(20px);
+            border-top: 0.5px solid rgba(0,0,0,0.05);
+        }
+
+        .action-sheet {
+            transform: translateY(100%);
+            transition: transform 0.4s cubic-bezier(0.32, 0.72, 0, 1);
+        }
+        .action-sheet.active { transform: translateY(0); }
+
+        .btn-black { 
+            background: #000; 
+            color: #FFF; 
+            border-radius: 100px; 
+            font-weight: 700; 
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .btn-black:active { transform: scale(0.96); opacity: 0.9; }
+
+        .exercise-card {
+            border-bottom: 0.5px solid rgba(0,0,0,0.05);
+            padding: 20px 0;
+        }
+
+        .check-pill {
+            width: 44px;
+            height: 44px;
+            border-radius: 14px;
+            background: var(--surface);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+        }
+        .check-pill.done { background: var(--accent); color: white; box-shadow: 0 4px 12px rgba(112, 0, 255, 0.3); }
+
+        input { font-variant-numeric: tabular-nums; caret-color: var(--accent); }
+
+        /* Animation for Page Transitions */
+        .fade-in { animation: fadeIn 0.4s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        .no-scrollbar::-webkit-scrollbar { display: none; }
     </style>
 </head>
-<body class="pb-32">
+<body class="safe-area-inset-top pb-32">
 
-    <!-- Screen Mask (Globaler Lade-Zustand) -->
-    <div id="loading-overlay" class="fixed inset-0 z-[200] bg-white flex items-center justify-center hidden">
-        <div class="w-12 h-12 border-4 border-blue-100 border-t-blue-500 rounded-full animate-spin"></div>
+    <!-- Loader -->
+    <div id="loader" class="fixed inset-0 z-[300] bg-white flex items-center justify-center">
+        <h1 class="text-2xl italic">STUDIO.</h1>
     </div>
 
-    <!-- Auth Screen -->
-    <div id="auth-screen" class="fixed inset-0 z-[100] bg-white flex flex-col items-center justify-center px-10 space-y-8 hidden">
-        <div class="text-center">
-            <h1 class="text-5xl font-bold tracking-tighter text-blue-600 mb-2">GNTK</h1>
-            <p class="text-gray-400 font-medium">Minimalist Gym Analytics</p>
+    <!-- Auth -->
+    <div id="auth-screen" class="fixed inset-0 z-[200] bg-white hidden flex flex-col justify-between p-10 pb-20">
+        <div class="mt-20">
+            <h1 class="text-7xl mb-2">GNTK.</h1>
+            <p class="text-xl font-medium tracking-tight text-gray-400">Transform your performance.</p>
         </div>
-        <div class="w-full max-w-sm space-y-4">
-            <input type="email" id="auth-email" placeholder="E-Mail" class="w-full bg-gray-50 p-4 rounded-xl outline-none border-none">
-            <input type="password" id="auth-password" placeholder="Passwort" class="w-full bg-gray-50 p-4 rounded-xl outline-none border-none">
-            <button onclick="handleSignIn()" class="btn-primary w-full py-4 rounded-xl font-bold shadow-lg shadow-blue-500/20">Anmelden</button>
-            <button onclick="handleSignUp()" class="w-full py-4 text-gray-400 font-bold text-sm">Neuen Account erstellen</button>
-            <p id="auth-error" class="text-red-500 text-xs text-center hidden"></p>
+        <div class="space-y-4">
+            <input type="email" id="auth-email" placeholder="E-Mail" class="w-full text-xl font-medium border-b-2 border-gray-100 py-4 outline-none focus:border-black transition-colors">
+            <input type="password" id="auth-password" placeholder="Passwort" class="w-full text-xl font-medium border-b-2 border-gray-100 py-4 outline-none focus:border-black transition-colors">
+            <div class="pt-10 space-y-4">
+                <button onclick="handleSignIn()" class="btn-black w-full py-5 text-lg">Anmelden</button>
+                <button onclick="handleSignUp()" class="w-full py-2 font-bold text-sm text-gray-400">Account erstellen</button>
+            </div>
         </div>
     </div>
 
-    <!-- Main Header -->
-    <header id="main-header" class="px-6 pt-12 pb-6">
-        <p class="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1" id="current-date">LADE...</p>
-        <h1 id="header-title" class="text-3xl font-bold tracking-tight">Übersicht</h1>
+    <!-- Header -->
+    <header id="main-header" class="px-8 pt-16 pb-8">
+        <div class="flex justify-between items-start">
+            <div>
+                <p class="meta-label mb-2" id="date-label">SESSION ALPHA</p>
+                <h1 id="view-title" class="text-5xl">GNTK</h1>
+            </div>
+            <div id="user-avatar" onclick="showTab('profile')" class="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center font-bold text-sm">?</div>
+        </div>
     </header>
 
-    <!-- Main Views -->
-    <main id="app" class="px-6 space-y-8">
-        <!-- TAB: HOME -->
-        <div id="home-screen" class="space-y-8">
-            <section class="flex space-x-2 overflow-x-auto no-scrollbar py-2" id="mini-calendar"></section>
-            <section class="space-y-4">
-                <div class="flex justify-between items-center"><h2 class="text-[13px] font-bold text-gray-400 uppercase tracking-wider">Meine Routinen</h2><button onclick="openRoutineEditor()" class="text-blue-500 text-sm font-bold">+ Neu</button></div>
-                <div id="routines-list" class="grid grid-cols-1 gap-3"></div>
-                <button onclick="startWorkout(null)" class="w-full py-4 rounded-2xl bg-gray-100 text-gray-500 font-bold text-xs uppercase tracking-widest">+ Leeres Training</button>
+    <!-- Content -->
+    <main id="view-container" class="px-8">
+        
+        <!-- HOME VIEW -->
+        <div id="view-home" class="fade-in space-y-12">
+            <section class="space-y-6">
+                <div class="bg-black p-8 rounded-[32px] text-white overflow-hidden relative shadow-2xl">
+                    <div class="relative z-10">
+                        <p class="meta-label text-white/50 mb-4">Intelligence</p>
+                        <p id="daily-insight" class="text-2xl font-bold leading-tight">Analysiere dein Potential...</p>
+                    </div>
+                    <div class="absolute -top-10 -right-10 w-40 h-40 bg-purple-600/30 blur-[60px]"></div>
+                </div>
             </section>
-            <section class="space-y-4">
-                <h2 class="text-[13px] font-bold text-gray-400 uppercase tracking-wider">Letzte Einheiten</h2>
-                <div id="history-list" class="space-y-3"></div>
+
+            <section class="space-y-6">
+                <div class="flex justify-between items-end">
+                    <h2 class="text-xs font-bold tracking-[0.2em] uppercase">Routinen</h2>
+                    <button onclick="openEditor()" class="text-sm font-bold text-indigo-600">+ Neu</button>
+                </div>
+                <div id="routines-list" class="grid grid-cols-1 gap-4"></div>
+                <button onclick="startWorkout(null)" class="w-full py-4 text-xs font-black tracking-widest text-gray-300 border border-dashed border-gray-200 rounded-2xl uppercase">Leere Session</button>
+            </section>
+
+            <section class="space-y-6 pb-10">
+                <h2 class="text-xs font-bold tracking-[0.2em] uppercase">Log</h2>
+                <div id="history-list" class="space-y-1"></div>
             </section>
         </div>
 
-        <!-- TAB: STATS -->
-        <div id="stats-screen" class="hidden space-y-8">
-            <div class="card p-6 space-y-6">
-                <h2 class="text-[13px] font-bold text-gray-400 uppercase tracking-wider text-center">Muskel-Fokus (letzte 10 Einheiten)</h2>
-                <div class="flex justify-center h-48"><canvas id="muscleChart"></canvas></div>
+        <!-- STATS VIEW -->
+        <div id="view-stats" class="hidden fade-in space-y-12">
+            <div class="space-y-8">
+                <p class="meta-label">Muskel Fokus</p>
+                <div class="h-64 flex justify-center"><canvas id="muscleChart"></canvas></div>
             </div>
-            <div class="card p-6 space-y-4">
-                <div class="flex justify-between items-center"><h2 class="text-[13px] font-bold text-gray-400 uppercase tracking-wider">Körpergewicht</h2><button onclick="addBodyMetric()" class="bg-blue-50 text-blue-500 px-3 py-1 rounded-lg text-xs font-bold">+ Log</button></div>
+            <div class="space-y-6">
+                <div class="flex justify-between items-center"><p class="meta-label">Körpergewicht</p><button onclick="logWeight()" class="text-xs font-black text-indigo-600">Eintragen</button></div>
                 <div class="h-48"><canvas id="weightChart"></canvas></div>
             </div>
         </div>
 
-        <!-- TAB: COACH -->
-        <div id="coach-screen" class="hidden flex flex-col">
-            <div id="chat-container" class="space-y-4 overflow-y-auto max-h-[60vh] flex flex-col pr-1 no-scrollbar"></div>
-            <div class="mt-4 flex space-x-2">
-                <input type="text" id="coach-input" placeholder="Frag deinen Coach..." class="flex-1 bg-white border-none rounded-2xl px-5 py-4 shadow-sm outline-none">
-                <button onclick="askCoach()" class="bg-blue-500 text-white p-4 rounded-2xl shadow-lg"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg></button>
+        <!-- COACH VIEW -->
+        <div id="view-coach" class="hidden flex flex-col fade-in">
+            <div id="chat-box" class="flex-1 space-y-8 overflow-y-auto no-scrollbar flex flex-col pb-6" style="height: 50vh;"></div>
+            <div class="mt-4 flex bg-gray-100 p-2 rounded-[24px]">
+                <input type="text" id="chat-input" placeholder="Nachricht..." class="flex-1 px-6 py-4 bg-transparent outline-none font-medium">
+                <button onclick="askCoach()" class="bg-black text-white px-6 rounded-[18px]"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"></path></svg></button>
             </div>
         </div>
 
-        <!-- TAB: PROFILE -->
-        <div id="profile-screen" class="hidden space-y-8">
-            <div class="card p-6 flex items-center space-x-5">
-                <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 text-2xl font-bold" id="p-initials">?</div>
-                <div><h2 class="text-xl font-bold" id="p-name">Athlet</h2><p class="text-gray-400 text-sm" id="p-email"></p></div>
+        <!-- PROFILE VIEW -->
+        <div id="view-profile" class="hidden fade-in space-y-12">
+            <div class="flex items-center space-x-6">
+                <div class="w-20 h-20 bg-gray-100 rounded-[30px] flex items-center justify-center text-3xl font-black" id="p-initials">?</div>
+                <div>
+                    <input type="text" id="p-name-input" onchange="saveProfileSettings()" placeholder="Dein Name" class="text-3xl font-black w-full p-0 leading-none mb-1">
+                    <p class="text-gray-400 font-medium" id="p-email"></p>
+                </div>
             </div>
-            <div class="grid grid-cols-2 gap-4">
-                <div class="card p-5 text-center"><p class="text-[10px] font-bold text-gray-400 uppercase mb-1 tracking-widest">Workouts</p><p class="text-2xl font-bold text-blue-600" id="s-count">0</p></div>
-                <div class="card p-5 text-center"><p class="text-[10px] font-bold text-gray-400 uppercase mb-1 tracking-widest">Gesamt kg</p><p class="text-2xl font-bold text-blue-600" id="s-volume">0</p></div>
+            
+            <div class="space-y-6">
+                <p class="meta-label">API Integration</p>
+                <div class="bg-gray-50 p-6 rounded-[24px]">
+                    <p class="text-[10px] font-black uppercase text-gray-400 mb-2">Gemini Key</p>
+                    <input type="password" id="p-api-key" onchange="saveProfileSettings()" placeholder="••••••••••••" class="w-full bg-transparent text-lg font-mono">
+                </div>
             </div>
-            <div class="card overflow-hidden">
-                <button onclick="handleSignOut()" class="w-full p-5 text-left text-red-500 font-bold bg-red-50/20">Sitzung beenden</button>
-            </div>
-        </div>
 
-        <!-- WORKOUT SCREEN (Vollbild Overlay) -->
-        <div id="workout-screen" class="fixed inset-0 z-[150] bg-white hidden flex flex-col">
-            <header class="p-6 flex justify-between items-end border-b border-gray-50">
-                <div><span id="w-timer" class="text-2xl font-bold tabular-nums">00:00</span><p class="text-[10px] text-gray-400 font-bold uppercase tracking-widest" id="w-label">Individuell</p></div>
-                <button onclick="completeWorkout()" class="bg-blue-600 text-white px-6 py-2.5 rounded-full font-bold shadow-lg shadow-blue-500/20">Beenden</button>
-            </header>
-            <div id="w-exercises" class="flex-1 overflow-y-auto p-6 space-y-6 pb-20"></div>
-            <div class="p-6 bg-white"><button onclick="showPicker(false)" class="w-full py-4 rounded-2xl border-2 border-dashed border-gray-200 text-gray-400 font-bold">+ Übung hinzufügen</button></div>
+            <div class="space-y-6">
+                <p class="meta-label">PR Wall</p>
+                <div id="personal-bests" class="space-y-4"></div>
+            </div>
+
+            <button onclick="handleSignOut()" class="w-full py-6 text-red-500 font-bold bg-red-50 rounded-[24px]">Session beenden</button>
         </div>
     </main>
 
-    <!-- Navigation -->
-    <nav id="bottom-nav" class="fixed bottom-8 left-6 right-6 h-16 bg-white/90 backdrop-blur-md rounded-2xl border border-white shadow-xl flex justify-around items-center z-40">
-        <button onclick="showTab('home')" id="btn-home" class="nav-item active p-3"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg></button>
-        <button onclick="showTab('stats')" id="btn-stats" class="nav-item p-3"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg></button>
-        <button onclick="showTab('coach')" id="btn-coach" class="nav-item p-3"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg></button>
-        <button onclick="showTab('profile')" id="btn-profile" class="nav-item p-3"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg></button>
-    </nav>
+    <!-- Workout Sheet -->
+    <div id="workout-overlay" class="fixed inset-0 z-[150] bg-white hidden flex flex-col action-sheet">
+        <header class="p-8 flex justify-between items-end">
+            <div><h2 id="wo-title" class="text-4xl font-black tracking-tight">Active</h2><p id="wo-timer" class="text-indigo-600 font-black tabular-nums text-xl">00:00</p></div>
+            <button onclick="finishWorkout()" class="btn-black px-10 py-4 shadow-2xl">FINISH</button>
+        </header>
+        <div id="wo-container" class="flex-1 overflow-y-auto px-8 space-y-10 pb-20 no-scrollbar"></div>
+        <div class="p-8"><button onclick="showPicker(false)" class="w-full py-6 rounded-[24px] border-2 border-black/5 text-sm font-black uppercase tracking-[0.2em]">+ Übung</button></div>
+    </div>
 
-    <!-- All Modals -->
-    <div id="picker-modal" class="fixed inset-0 z-[200] hidden bg-white flex flex-col">
-        <header class="p-6 flex justify-between items-center"><h2 class="text-2xl font-bold">Übung</h2><button onclick="closePicker()" class="text-gray-400 text-4xl">&times;</button></header>
-        <div class="px-6 mb-4 space-y-4"><input type="text" id="p-search" placeholder="Suche..." class="w-full bg-gray-100 p-4 rounded-2xl outline-none">
-            <div id="p-muscle-filters" class="flex space-x-2 overflow-x-auto no-scrollbar"></div>
-            <div id="p-equip-filters" class="flex space-x-2 overflow-x-auto no-scrollbar"></div>
+    <!-- Picker Sheet -->
+    <div id="picker-modal" class="fixed inset-0 z-[200] hidden bg-white flex flex-col action-sheet shadow-2xl">
+        <header class="p-8 flex justify-between items-center"><h2 class="text-3xl font-black">Search.</h2><button onclick="closePicker()" class="text-4xl">&times;</button></header>
+        <div class="px-8 mb-6 space-y-6">
+            <input type="text" id="p-search" placeholder="Was trainieren wir?" class="w-full text-2xl font-bold py-2 border-b-4 border-gray-50 focus:border-black outline-none transition-all">
+            <div id="p-filters" class="flex space-x-3 overflow-x-auto no-scrollbar py-2"></div>
         </div>
-        <div id="p-list" class="flex-1 overflow-y-auto px-6 space-y-3 pb-10"></div>
+        <div id="p-list" class="flex-1 overflow-y-auto px-8 space-y-1 pb-20 no-scrollbar"></div>
     </div>
 
-    <div id="routine-editor" class="fixed inset-0 z-[180] hidden bg-white flex flex-col">
-        <header class="p-6 flex justify-between items-center"><h2 class="text-2xl font-bold">Neue Routine</h2><button onclick="closeRoutineEditor()" class="text-gray-400 text-3xl">&times;</button></header>
-        <div class="px-6 flex-1 space-y-6 overflow-y-auto"><input type="text" id="re-name" placeholder="Name der Routine" class="w-full text-2xl font-bold border-none outline-none"><div id="re-list" class="space-y-3"></div><button onclick="showPicker(true)" class="w-full py-4 border-2 border-dashed rounded-2xl text-gray-400 font-bold">+ Übung hinzufügen</button></div>
-        <div class="p-6"><button onclick="saveNewRoutine()" class="btn-primary w-full py-4 rounded-2xl font-bold">Speichern</button></div>
-    </div>
-
-    <div id="detail-modal" class="fixed inset-0 z-[250] hidden bg-white flex flex-col">
-        <header class="p-6 flex justify-between items-center border-b border-gray-50"><h2 id="d-title" class="text-xl font-bold">Übung</h2><button onclick="closeDetail()" class="text-gray-400 text-4xl">&times;</button></header>
-        <div class="flex-1 overflow-y-auto p-6 space-y-10">
-            <div class="aspect-square rounded-3xl overflow-hidden bg-gray-50 max-w-sm mx-auto shadow-sm flex items-center justify-center"><img id="d-gif" src="" class="w-full h-full object-cover mix-blend-multiply"></div>
-            <div class="space-y-4">
-                <h3 class="text-xs font-bold text-gray-400 uppercase tracking-widest">Fortschritt (est. 1RM)</h3>
+    <!-- Details Overlay -->
+    <div id="detail-modal" class="fixed inset-0 z-[250] hidden bg-white flex flex-col fade-in">
+        <header class="p-8 flex justify-between items-center"><h2 id="d-title" class="text-2xl font-black">Detail.</h2><button onclick="closeDetail()" class="text-4xl">&times;</button></header>
+        <div class="flex-1 overflow-y-auto px-8 space-y-12 pb-20">
+            <div class="aspect-square rounded-[60px] overflow-hidden bg-gray-50 flex items-center justify-center"><img id="d-gif" src="" class="w-full h-full object-cover mix-blend-multiply"></div>
+            <div class="space-y-6">
+                <p class="meta-label">Progression Graph</p>
                 <div class="h-64"><canvas id="d-chart"></canvas></div>
             </div>
         </div>
     </div>
 
-    <div id="history-modal" class="fixed inset-0 z-[190] hidden bg-white flex flex-col">
-        <header class="p-6 flex justify-between items-center border-b border-gray-50"><h2 id="h-date" class="text-xl font-bold">Workout</h2><div class="flex items-center space-x-6"><button id="h-delete" class="text-red-500"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" stroke-width="2" stroke-linecap="round"></path></svg></button><button onclick="closeHistory()" class="text-gray-400 text-4xl">&times;</button></div></header>
-        <div id="h-content" class="flex-1 overflow-y-auto p-6 space-y-6"></div>
-    </div>
-
-    <!-- PAUSEN TIMER -->
-    <div id="rt-overlay" class="fixed bottom-28 left-1/2 -translate-x-1/2 bg-white border border-gray-100 px-8 py-4 rounded-3xl shadow-2xl z-50 hidden flex items-center space-x-4">
-        <div class="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
-        <span id="rt-time" class="text-2xl font-bold tabular-nums text-blue-500">60</span>
-    </div>
+    <!-- Floating Nav -->
+    <nav id="navbar" class="fixed bottom-10 left-8 right-8 h-20 glass-nav rounded-[32px] flex justify-around items-center z-40 px-4 shadow-2xl">
+        <button onclick="showTab('home')" id="nav-home" class="nav-item active flex-1"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg><span class="hidden">H</span></button>
+        <button onclick="showTab('stats')" id="nav-stats" class="nav-item flex-1"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg><span class="hidden">S</span></button>
+        <button onclick="showTab('coach')" id="nav-coach" class="nav-item flex-1"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg><span class="hidden">C</span></button>
+        <button onclick="showTab('profile')" id="nav-profile" class="nav-item flex-1"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg><span class="hidden">P</span></button>
+    </nav>
 
     <script>
         const { createClient } = supabase;
         const supabaseUrl = 'https://zefzrvnqpqmypzskrskl.supabase.co';
         const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InplZnpydm5xcHFteXB6c2tyc2tsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA0MTkyMDcsImV4cCI6MjA5NTk5NTIwN30.k-4lVCN_vCHUS212fBZq1Wr4lhnDVth1mednj20_HXA';
-        const GEMINI_KEY = 'AQ.Ab8RN6JIZGT1kdUVvJa9YlgqM4rzmMBl_eOlBLfg_ekwFdENhQ';
         const db = createClient(supabaseUrl, supabaseKey);
 
         let user = null, activeW = null, timerInt = null, restInt = null;
-        let sMuscle = null, sEquip = null, pRes = [], hData = [], rData = [], pBests = {}, reEx = [], isREPicker = false;
+        let pRes = [], hData = [], rData = [], pBests = {}, sMuscle = null, reEx = [], isREPicker = false;
         let charts = { muscle: null, weight: null, detail: null };
+        let userApiKey = null;
 
-        // --- CORE AUTH ---
+        // --- AUTH ---
         async function checkAuth() {
             const { data } = await db.auth.getSession();
-            if (data.session) {
-                user = data.session.user;
-                initApp();
-            } else {
-                document.getElementById('auth-screen').classList.remove('hidden');
-            }
+            if (data.session) { user = data.session.user; initApp(); }
+            else { document.getElementById('auth-screen').classList.remove('hidden'); document.getElementById('loader').classList.add('hidden'); }
         }
-        db.auth.onAuthStateChange((_, s) => {
-            if (s) { user = s.user; initApp(); }
-            else { window.location.reload(); }
-        });
+        db.auth.onAuthStateChange((_, s) => { if (s) { user = s.user; initApp(); } else { window.location.reload(); } });
 
         async function initApp() {
+            document.getElementById('loader').classList.add('hidden');
             document.getElementById('auth-screen').classList.add('hidden');
-            updateUserUI();
-            await loadAllData();
-            showTab('home');
-        }
-
-        async function loadAllData() {
-            const date = new Date().toLocaleDateString('de-DE', { weekday: 'long', day: 'numeric', month: 'long' }).toUpperCase();
-            document.getElementById('current-date').textContent = date;
-            await Promise.all([refreshHistory(), refreshRoutines(), refreshPRs()]);
-        }
-
-        function updateUserUI() {
+            userApiKey = user.user_metadata?.gemini_key;
+            document.getElementById('p-name-input').value = user.user_metadata?.full_name || "";
+            document.getElementById('p-api-key').value = userApiKey || "";
             document.getElementById('p-email').textContent = user.email;
-            document.getElementById('p-initials').textContent = user.email.charAt(0).toUpperCase();
+            document.getElementById('p-initials').textContent = (user.user_metadata?.full_name || user.email).charAt(0).toUpperCase();
+            await loadData();
+            getCoachInsight();
         }
 
-        // --- NAVIGATION ---
+        async function loadData() {
+            const { data: h } = await db.from('workouts').select('*, sets(*, exercises(*))').eq('user_id', user.id).order('start_time', { ascending: false });
+            hData = h || [];
+            const { data: r } = await db.from('routines').select('*, routine_exercises(exercises(*))').eq('user_id', user.id);
+            rData = r || [];
+            renderHome(); refreshPRs();
+        }
+
+        // --- UI CORE ---
         function showTab(t) {
             ['home','stats','coach','profile'].forEach(id => {
-                document.getElementById(id + '-screen').classList.add('hidden');
-                document.getElementById('btn-' + id).classList.remove('active');
+                document.getElementById('view-' + id).classList.add('hidden');
+                document.getElementById('nav-' + id).classList.remove('active');
             });
-            document.getElementById(t + '-screen').classList.remove('hidden');
-            document.getElementById('btn-' + t).classList.add('active');
-            document.getElementById('header-title').textContent = {home:'GNTK', stats:'Analytics', coach:'Coach', profile:'Profil'}[t];
-            if (t === 'stats') renderStats();
+            document.getElementById('view-' + t).classList.remove('hidden');
+            document.getElementById('nav-' + t).classList.add('active');
+            document.getElementById('view-title').textContent = {home:'STUDIO.', stats:'ANALYTICS.', coach:'COACH.', profile:'STUDIO ID.'}[t];
+            if(t === 'stats') renderStats();
         }
 
-        // --- DATABASE REFRESH ---
-        async function refreshHistory() {
-            const { data } = await db.from('workouts').select('*, sets(*, exercises(*))').eq('user_id', user.id).order('start_time', { ascending: false });
-            hData = data || [];
-            renderHistoryUI();
-            renderCalendarUI();
-        }
-
-        async function refreshRoutines() {
-            const { data } = await db.from('routines').select('*, routine_exercises(exercises(*))').eq('user_id', user.id);
-            rData = data || [];
-            renderRoutinesUI();
-        }
-
-        async function refreshPRs() {
-            const { data } = await db.from('sets').select('*, exercises(name)').order('created_at');
-            pBests = {};
-            data.forEach(s => {
-                const val = parseFloat(s.weight) * (1 + parseInt(s.reps) / 30);
-                if (!pBests[s.exercise_id] || val > pBests[s.exercise_id].val) {
-                    pBests[s.exercise_id] = { val, weight: s.weight, reps: s.reps, name: s.exercises.name };
-                }
-            });
-            renderPRUI();
-        }
-
-        // --- UI RENDERING ---
-        function renderHistoryUI() {
-            const list = document.getElementById('history-list');
-            if (hData.length === 0) { list.innerHTML = '<div class="card p-10 text-center text-gray-400 text-sm">Noch kein Training.</div>'; return; }
-            list.innerHTML = hData.map((w, i) => `
-                <div class="card p-5 flex justify-between items-center active:scale-[0.98] transition" onclick="openHistory(${i})">
-                    <div><div class="font-bold text-[15px]">${new Date(w.start_time).toLocaleDateString('de-DE')}</div><div class="text-[10px] text-gray-400 font-bold uppercase tracking-widest">${w.sets.length} Sätze</div></div>
-                    <div class="bg-gray-50 p-2 rounded-full"><svg class="w-4 h-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7" stroke-width="2" stroke-linecap="round"></path></svg></div>
-                </div>
-            `).join('');
-            
-            let vol = 0; hData.forEach(w => w.sets.forEach(s => vol += (s.weight * s.reps)));
-            document.getElementById('s-count').textContent = hData.length;
-            document.getElementById('s-volume').textContent = Math.round(vol).toLocaleString() + " kg";
-        }
-
-        function renderCalendarUI() {
-            const dates = hData.map(w => new Date(w.start_time).toLocaleDateString());
-            const container = document.getElementById('mini-calendar');
-            let html = "";
-            for(let i=6; i>=0; i--) {
-                const d = new Date(); d.setDate(d.getDate() - i);
-                const active = dates.includes(d.toLocaleDateString());
-                html += `<div class="cal-day ${active ? 'cal-active' : 'bg-white border border-gray-100 text-gray-400'}">
-                    <span class="text-[8px] font-bold uppercase">${d.toLocaleDateString('de-DE',{weekday:'short'})}</span>
-                    <span class="font-bold text-sm">${d.getDate()}</span>
-                </div>`;
-            }
-            container.innerHTML = html;
-        }
-
-        function renderRoutinesUI() {
+        function renderHome() {
             document.getElementById('routines-list').innerHTML = rData.map((r, i) => `
-                <div class="card p-5 flex justify-between items-center active:scale-[0.98] transition" onclick="startWorkout(${i})">
-                    <div><h3 class="font-bold text-[15px]">${r.name}</h3><p class="text-[10px] text-gray-400 font-bold uppercase tracking-widest">${r.routine_exercises.length} Übungen</p></div>
-                    <div class="bg-blue-50 p-2 rounded-full text-blue-500"><svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></div>
+                <div class="bg-gray-50 p-8 rounded-[32px] flex justify-between items-center active:scale-95 transition" onclick="startWorkout(${i})">
+                    <div><h3 class="text-xl font-black mb-1">${r.name}</h3><p class="meta-label">${r.routine_exercises.length} Übungen</p></div>
+                    <svg class="w-6 h-6 text-black" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                </div>
+            `).join('');
+
+            document.getElementById('history-list').innerHTML = hData.slice(0,10).map((w, i) => `
+                <div class="exercise-card flex justify-between items-center active:opacity-50 transition" onclick="openHistory(${i})">
+                    <div><p class="meta-label mb-1">${new Date(w.start_time).toLocaleDateString('de-DE', {day:'2-digit', month:'2-digit'})}</p><h3 class="text-lg font-bold">${w.name}</h3></div>
+                    <p class="text-xs font-bold text-gray-400">${w.sets.length} SÄTZE</p>
                 </div>
             `).join('');
         }
 
-        function renderPRUI() {
-            const sorted = Object.values(pBests).sort((a,b) => b.val - a.val).slice(0,5);
-            document.getElementById('personal-bests').innerHTML = sorted.map(pr => `
-                <div class="card p-4 flex justify-between items-center bg-blue-50/20 border-blue-100">
-                    <span class="font-bold text-sm text-blue-900">${pr.name}</span>
-                    <span class="text-blue-600 font-bold text-sm">${pr.weight}kg x ${pr.reps}</span>
-                </div>
-            `).join('');
-        }
-
-        // --- WORKOUT LOGIC ---
+        // --- WORKOUT ---
         async function startWorkout(rIdx) {
-            activeW = { startTime: new Date(), exercises: [], name: 'Individuell' };
+            activeW = { startTime: new Date(), exercises: [], name: 'Custom' };
             if (rIdx !== null) {
-                const r = rData[rIdx];
-                activeW.name = r.name;
+                const r = rData[rIdx]; activeW.name = r.name;
                 for (let re of r.routine_exercises) {
                     const ex = re.exercises;
-                    const { data: ls } = await db.from('sets').select('*').eq('exercise_id', ex.id).order('created_at', { ascending: false }).limit(5);
-                    let lp = "-"; if (ls && ls.length > 0) { const lId = ls[0].workout_id; lp = ls.filter(s => s.workout_id === lId).map(s => `${s.weight}kg x ${s.reps}`).join(' | '); }
-                    activeW.exercises.push({ ...ex, lastP: lp, sets: [{ weight: '', reps: '', rpe: '', type: 'Normal', done: false }] });
+                    const lastW = hData.find(w => w.sets.some(s => s.exercise_id === ex.id));
+                    let lp = lastW ? lastW.sets.filter(s => s.exercise_id === ex.id).map(s => `${s.weight}x${s.reps}`).join(' · ') : null;
+                    activeW.exercises.push({ ...ex, lastP: lp, sets: [{ weight: lastW?.sets[0]?.weight || '', reps: lastW?.sets[0]?.reps || '', type: 'Normal', done: false }] });
                 }
             }
-            document.getElementById('w-label').textContent = activeW.name;
-            document.getElementById('workout-screen').classList.remove('hidden');
-            renderActiveWUI();
-            startWTimer();
+            document.getElementById('wo-title').textContent = activeW.name;
+            const overlay = document.getElementById('workout-overlay');
+            overlay.classList.remove('hidden');
+            setTimeout(() => overlay.classList.add('active'), 10);
+            renderWorkoutUI();
+            startTimer();
         }
 
-        function renderActiveWUI() {
-            document.getElementById('w-exercises').innerHTML = activeW.exercises.map((ex, exI) => `
-                <div class="card p-5 space-y-4">
-                    <div class="flex justify-between items-center" onclick="openDetail('${ex.id}', '${ex.gif_url}', '${ex.name}')">
-                        <div class="flex items-center space-x-3"><img src="${ex.gif_url}" class="w-10 h-10 rounded-lg bg-gray-50 mix-blend-multiply"><h3 class="font-bold text-blue-600 text-[15px]">${ex.name}</h3></div>
-                        <button onclick="event.stopPropagation(); activeW.exercises.splice(${exI},1); renderActiveWUI();" class="text-gray-300 p-1"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" stroke-width="2"></path></svg></button>
+        function renderWorkoutUI() {
+            document.getElementById('wo-container').innerHTML = activeW.exercises.map((ex, exI) => `
+                <div class="space-y-6">
+                    <div class="flex justify-between items-center">
+                        <div class="flex items-center space-x-4" onclick="openDetail('${ex.id}', '${ex.gif_url}', '${ex.name}')">
+                            <div class="w-14 h-14 rounded-2xl bg-gray-50 flex items-center justify-center overflow-hidden"><img src="${ex.gif_url}" class="w-full h-full object-cover mix-blend-multiply"></div>
+                            <div><h3 class="text-lg font-black leading-none mb-1">${ex.name}</h3><p class="meta-label text-[8px]">${ex.muscle}</p></div>
+                        </div>
+                        <button onclick="activeW.exercises.splice(${exI},1); renderWorkoutUI();" class="text-gray-300">&times;</button>
                     </div>
-                    ${ex.lastP ? `<p class="text-[10px] text-gray-400 font-bold bg-gray-50 p-2 rounded-lg">ZULETZT: ${ex.lastP}</p>` : ''}
-                    <table class="w-full text-center text-xs">
-                        <tr class="text-[9px] text-gray-300 font-bold uppercase tracking-widest"><td>Typ</td><td>kg</td><td>Wdh</td><td>RPE</td><td>Ok</td></tr>
+                    ${ex.lastP ? `<p class="meta-label text-[8px] bg-gray-50 py-1.5 px-3 rounded-lg">LAST: ${ex.lastP}</p>` : ''}
+                    <div class="space-y-2">
                         ${ex.sets.map((s, sI) => `
-                            <tr class="${s.done ? 'opacity-30' : ''}">
-                                <td><div onclick="cycleSateType(${exI}, ${sI})" class="type-indicator type-${s.type.charAt(0)} mx-auto">${s.type.charAt(0)}</div></td>
-                                <td><input type="number" value="${s.weight}" oninput="activeW.exercises[${exI}].sets[${sI}].weight=this.value" class="w-12 py-3 font-bold text-center outline-none"></td>
-                                <td><input type="number" value="${s.reps}" oninput="activeW.exercises[${exI}].sets[${sI}].reps=this.value" class="w-12 py-3 font-bold text-center outline-none"></td>
-                                <td><input type="number" value="${s.rpe}" placeholder="-" oninput="activeW.exercises[${exI}].sets[${sI}].rpe=this.value" class="w-8 py-3 font-medium text-blue-400 text-center outline-none"></td>
-                                <td class="text-right"><input type="checkbox" ${s.done ? 'checked' : ''} onchange="toggleSetDone(${exI}, ${sI})" class="custom-checkbox"></td>
-                            </tr>
+                            <div class="flex items-center space-x-3 ${s.done ? 'opacity-20' : ''} transition-opacity">
+                                <div onclick="cycleType(${exI},${sI})" class="type-indicator type-${s.type.charAt(0)}">${s.type.charAt(0)}</div>
+                                <div class="flex-1 flex space-x-2">
+                                    <input type="number" value="${s.weight}" placeholder="KG" oninput="activeW.exercises[${exI}].sets[${sI}].weight=this.value" class="w-full bg-gray-50 py-4 px-4 rounded-xl font-bold text-center">
+                                    <input type="number" value="${s.reps}" placeholder="REPS" oninput="activeW.exercises[${exI}].sets[${sI}].reps=this.value" class="w-full bg-gray-50 py-4 px-4 rounded-xl font-bold text-center">
+                                </div>
+                                <button onclick="toggleSet(${exI},${sI})" class="check-pill ${s.done ? 'done' : ''}"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7" stroke-width="4"></path></svg></button>
+                            </div>
                         `).join('')}
-                    </table>
-                    <button onclick="addWSet(${exI})" class="w-full py-2.5 bg-gray-50 rounded-xl text-[11px] font-bold text-gray-400">+ Satz</button>
+                    </div>
+                    <button onclick="addSet(${exI})" class="meta-label text-indigo-600 font-black">+ Set hinzufügen</button>
                 </div>
             `).join('');
         }
 
-        function toggleSetDone(exI, sI) {
+        function toggleSet(exI, sI) {
             const s = activeW.exercises[exI].sets[sI]; s.done = !s.done;
-            if (s.done && s.weight && s.reps) {
-                const val = parseFloat(s.weight) * (1 + parseInt(s.reps) / 30);
-                if (!pBests[activeW.exercises[exI].id] || val > pBests[activeW.exercises[exI].id].val) {
-                    confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
-                }
-                startRestTimer();
+            if (s.done) {
+                if(navigator.vibrate) navigator.vibrate(15);
+                const val = s.weight * (1 + s.reps/30);
+                if (!pBests[activeW.exercises[exI].id] || val > pBests[activeW.exercises[exI].id].val) confetti({ particleCount: 50, spread: 40, origin: { y: 0.9 }, colors: ['#7000FF'] });
             }
-            renderActiveWUI();
+            renderWorkoutUI();
         }
 
-        function startRestTimer() {
-            clearInterval(restInt);
-            document.getElementById('rt-overlay').classList.remove('hidden');
-            let left = 60;
-            document.getElementById('rt-time').textContent = left;
-            restInt = setInterval(() => {
-                left--; document.getElementById('rt-time').textContent = left;
-                if (left <= 0) { clearInterval(restInt); document.getElementById('rt-overlay').classList.add('hidden'); }
-            }, 1000);
-        }
-
-        function cycleSateType(exI, sI) {
-            const t = ['Normal', 'Warmup', 'Dropset', 'Failure'];
-            const cur = t.indexOf(activeW.exercises[exI].sets[sI].type);
-            activeW.exercises[exI].sets[sI].type = t[(cur + 1) % t.length];
-            renderActiveWUI();
-        }
-
-        function addWSet(exI) {
-            const last = activeW.exercises[exI].sets.slice(-1)[0];
-            activeW.exercises[exI].sets.push({ weight: last.weight, reps: last.reps, rpe: '', type: last.type, done: false });
-            renderActiveWUI();
-        }
-
-        function startWTimer() {
-            const el = document.getElementById('w-timer');
-            timerInt = setInterval(() => {
-                const d = Math.floor((new Date() - activeW.startTime) / 1000);
-                el.textContent = `${Math.floor(d/60).toString().padStart(2,'0')}:${(d%60).toString().padStart(2,'0')}`;
-            }, 1000);
-        }
-
-        async function completeWorkout() {
-            if (activeW.exercises.length === 0) return window.location.reload();
-            if (!confirm('Speichern?')) return;
-            document.getElementById('loading-overlay').classList.remove('hidden');
-            try {
-                const { data } = await db.from('workouts').insert([{ user_id: user.id, name: activeW.name }]).select();
-                const wId = data[0].id;
-                const sets = [];
-                activeW.exercises.forEach(ex => ex.sets.forEach((s, i) => {
-                    if (s.done) sets.push({ workout_id: wId, exercise_id: ex.id, weight: parseFloat(s.weight)||0, reps: parseInt(s.reps)||0, rpe: parseInt(s.rpe)||null, set_type: s.type, set_order: i });
-                }));
-                if (sets.length > 0) await db.from('sets').insert(sets);
-                window.location.reload();
-            } catch (e) { alert("Save failed."); document.getElementById('loading-overlay').classList.add('hidden'); }
-        }
-
-        // --- PICKER & ROUTINE EDITOR ---
-        function openRoutineEditor() { reEx = []; document.getElementById('re-name').value = ""; document.getElementById('re-list').innerHTML = ""; document.getElementById('routine-editor').classList.remove('hidden'); }
-        function closeRoutineEditor() { document.getElementById('routine-editor').classList.add('hidden'); }
-        async function saveNewRoutine() {
-            const name = document.getElementById('re-name').value;
-            if (!name || reEx.length === 0) return alert("Name/Übung fehlt.");
-            const { data } = await db.from('routines').insert([{ user_id: user.id, name }]).select();
-            const entries = reEx.map((ex, i) => ({ routine_id: data[0].id, exercise_id: ex.id, exercise_order: i }));
-            await db.from('routine_exercises').insert(entries);
+        async function finishWorkout() {
+            const overlay = document.getElementById('workout-overlay');
+            if (activeW.exercises.length === 0) { overlay.classList.remove('active'); setTimeout(()=>overlay.classList.add('hidden'), 400); return; }
+            if (!confirm('Session speichern?')) return;
+            const { data } = await db.from('workouts').insert([{ user_id: user.id, name: activeW.name }]).select();
+            const sets = [];
+            activeW.exercises.forEach(ex => ex.sets.forEach((s, i) => { if (s.done) sets.push({ workout_id: data[0].id, exercise_id: ex.id, weight: parseFloat(s.weight)||0, reps: parseInt(s.reps)||0, set_type: s.type, set_order: i }); }));
+            if (sets.length > 0) await db.from('sets').insert(sets);
             window.location.reload();
         }
 
-        function showPicker(routineMode) {
-            isREPicker = routineMode;
-            document.getElementById('picker-modal').classList.remove('hidden');
-            renderFilters();
-            runSearch("");
-        }
-        function closePicker() { document.getElementById('picker-modal').classList.add('hidden'); }
-
-        const muscles = ["Brust", "Rücken", "Beine", "Schultern", "Arme", "Bauch", "Ganzkörper"];
-        const equips = ["Langhantel", "Kurzhantel", "Maschine", "Kabelzug", "Eigengewicht", "Band", "Kettlebell"];
-
-        function renderFilters() {
-            document.getElementById('p-muscle-filters').innerHTML = muscles.map(m => `<button class="filter-chip ${sMuscle === m ? 'active' : ''}" onclick="sMuscle = sMuscle === '${m}' ? null : '${m}'; runSearch(document.getElementById('p-search').value)">${m}</button>`).join('');
-            document.getElementById('p-equip-filters').innerHTML = equips.map(e => `<button class="filter-chip ${sEquip === e ? 'active' : ''}" onclick="sEquip = sEquip === '${e}' ? null : '${e}'; runSearch(document.getElementById('p-search').value)">${e}</button>`).join('');
-        }
-
-        let sT = null;
-        document.getElementById('p-search').oninput = (e) => { clearTimeout(sT); sT = setTimeout(() => runSearch(e.target.value), 300); };
-
-        async function runSearch(query) {
-            let q = db.from('exercises').select('*');
-            if (query) q = q.ilike('name', `%${query}%`);
-            if (sMuscle) q = q.eq('muscle', sMuscle);
-            if (sEquip) q = q.eq('equipment', sEquip);
-            const { data } = await q.order('name').limit(25);
-            pRes = data || [];
-            document.getElementById('p-list').innerHTML = pRes.map((ex, i) => `
-                <div class="card p-4 flex items-center space-x-4 active:scale-95 transition" onclick="selectEx(${i})">
-                    <div class="w-12 h-12 rounded-xl bg-gray-50 overflow-hidden flex items-center justify-center"><img src="${ex.gif_url}" class="w-full h-full object-cover mix-blend-multiply"></div>
-                    <div class="font-bold text-[14px]">${ex.name}</div>
-                </div>
-            `).join('');
-        }
-
-        function selectEx(i) {
-            const ex = pRes[i];
-            if (isREPicker) {
-                reEx.push(ex);
-                document.getElementById('re-list').innerHTML = reEx.map(e => `<div class="card p-4 bg-gray-50 border-none font-bold text-sm">${e.name}</div>`).join('');
-            } else {
-                activeW.exercises.push({ ...ex, sets: [{ weight: '', reps: '', rpe: '', type: 'Normal', done: false }] });
-                renderActiveWUI();
-            }
-            closePicker();
-        }
-
-        // --- ANALYTICS ---
-        async function renderStats() {
-            // Muscle Pie
-            const counts = {};
-            hData.slice(0, 10).forEach(w => w.sets.forEach(s => { const m = s.exercises?.muscle || 'Andere'; counts[m] = (counts[m] || 0) + 1; }));
-            if (charts.muscle) charts.muscle.destroy();
-            charts.muscle = new Chart(document.getElementById('muscleChart'), { type: 'doughnut', data: { labels: Object.keys(counts), datasets: [{ data: Object.values(counts), backgroundColor: ['#007AFF', '#5856D6', '#FF2D55', '#FF9500', '#34C759', '#AF52DE'] }] }, options: { plugins: { legend: { position: 'bottom', labels: { boxWidth: 8, font: { size: 9 } } } } } });
-
-            // Weight Line
-            const { data } = await db.from('body_metrics').select('*').eq('user_id', user.id).order('created_at');
-            if (data && data.length > 0) {
-                if (charts.weight) charts.weight.destroy();
-                charts.weight = new Chart(document.getElementById('weightChart'), { type: 'line', data: { labels: data.map(m => new Date(m.created_at).toLocaleDateString('de-DE', {day:'2-digit', month:'2-digit'})), datasets: [{ label: 'kg', data: data.map(m => m.value), borderColor: '#007AFF', tension: 0.4, fill: false }] }, options: { responsive: true, maintainAspectRatio: false, scales: { x: { grid: { display: false } }, y: { grid: { display: false } } }, plugins: { legend: { display: false } } } });
-            }
-        }
-
-        async function addBodyMetric() {
-            const v = prompt("Gewicht (kg):"); if (!v) return;
-            await db.from('body_metrics').insert([{ user_id: user.id, metric_type: 'Gewicht', value: parseFloat(v) }]);
-            renderStats();
-        }
-
-        // --- HISTORY & DETAIL ---
-        function openHistory(i) {
-            const w = hData[i];
-            document.getElementById('h-date').textContent = new Date(w.start_time).toLocaleDateString('de-DE', { weekday:'long', day:'numeric', month:'long' });
-            const groups = {};
-            w.sets.forEach(s => { if (!groups[s.exercise_id]) groups[s.exercise_id] = { name: s.exercises.name, sets: [] }; groups[s.exercise_id].sets.push(s); });
-            document.getElementById('h-content').innerHTML = Object.values(groups).map(g => `
-                <div class="space-y-2"><h3 class="font-bold text-blue-600">${g.name}</h3><div class="card p-4 space-y-2">${g.sets.map((s, si) => `<div class="flex justify-between text-sm"><span class="text-gray-400 font-medium">Satz ${si+1} (${s.set_type.charAt(0)})</span><span class="font-bold">${s.weight}kg x ${s.reps} <span class="text-[10px] text-blue-400">@${s.rpe||'-'}</span></span></div>`).join('')}</div></div>
-            `).join('');
-            document.getElementById('h-delete').onclick = async () => { if (confirm('Löschen?')) { await db.from('workouts').delete().eq('id', w.id); window.location.reload(); } };
-            document.getElementById('history-modal').classList.remove('hidden');
-        }
-        function closeHistory() { document.getElementById('history-modal').classList.add('hidden'); }
-
-        async function openDetail(id, url, name) {
-            document.getElementById('d-title').textContent = name;
-            document.getElementById('d-gif').src = url;
-            document.getElementById('detail-modal').classList.remove('hidden');
-            const { data } = await db.from('sets').select('*, workouts(start_time)').eq('exercise_id', id).order('created_at');
-            const prog = {};
-            data.forEach(s => { const d = new Date(s.workouts.start_time).toLocaleDateString('de-DE', {day:'2-digit',month:'2-digit'}); const val = s.weight * (1 + s.reps/30); if (!prog[d] || val > prog[d]) prog[d] = val; });
-            if (charts.detail) charts.detail.destroy();
-            charts.detail = new Chart(document.getElementById('d-chart'), { type: 'line', data: { labels: Object.keys(prog), datasets: [{ data: Object.values(prog), borderColor: '#007AFF', backgroundColor: 'rgba(0,122,255,0.05)', fill: true, tension: 0.4 }] }, options: { responsive: true, maintainAspectRatio: false, scales: { y: { grid: { display: false } }, x: { grid: { display: false } } }, plugins: { legend: { display: false } } } });
-        }
-        function closeDetail() { document.getElementById('detail-modal').classList.add('hidden'); }
-
         // --- COACH ---
+        async function getCoachInsight() {
+            if(!userApiKey) { document.getElementById('daily-insight').textContent = "Hinterlege dein Studio Key im Profil."; return; }
+            const prompt = `Du bist GNTK Studio Coach. Antworte in EINEM kurzen Satz mit Fitness-Expertise basierend auf ${hData.length} Workouts. Mutig und direkt.`;
+            callGemini(prompt, r => document.getElementById('daily-insight').textContent = r);
+        }
+
         async function askCoach() {
-            const input = document.getElementById('coach-input');
-            const text = input.value.trim(); if (!text) return;
-            const container = document.getElementById('chat-container');
-            container.innerHTML += `<div class="chat-bubble chat-user">${text}</div>`;
-            input.value = ""; container.scrollTop = container.scrollHeight;
-            const lid = "L-" + Date.now();
-            container.innerHTML += `<div id="${lid}" class="chat-bubble chat-coach animate-pulse">...</div>`;
+            const input = document.getElementById('chat-input'); const text = input.value.trim(); if (!text || !userApiKey) return;
+            const chat = document.getElementById('chat-box'); chat.innerHTML += `<div class="chat-bubble chat-user">${text}</div>`; input.value = "";
+            const lId = "L"+Date.now(); chat.innerHTML += `<div id="${lId}" class="chat-bubble chat-coach">...</div>`;
+            chat.scrollTop = chat.scrollHeight;
+            callGemini(text, r => { document.getElementById(lId).innerHTML = r.replace(/\*\*(.*?)\*\*/g, '<b>$1</b>'); chat.scrollTop = chat.scrollHeight; });
+        }
+
+        async function callGemini(text, cb) {
             try {
-                const hSum = hData.slice(0,3).map(w => ({ date: w.start_time, exercises: w.sets.length }));
-                const prompt = `Du bist Coach. Historie: ${JSON.stringify(hSum)}. User: "${text}". Antworte kurz & motivierend.`;
-                const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_KEY}`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] }) });
-                const d = await res.json();
-                document.getElementById(lid).innerHTML = d.candidates[0].content.parts[0].text.replace(/\*\*(.*?)\*\*/g, '<b>$1</b>');
-            } catch (e) { document.getElementById(lid).textContent = "Fehler: Coach offline."; }
-            container.scrollTop = container.scrollHeight;
+                const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${userApiKey}`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ contents: [{ parts: [{ text }] }] }) });
+                const d = await res.json(); cb(d.candidates[0].content.parts[0].text);
+            } catch (e) { cb("Key Error."); }
         }
 
-        async function handleSignIn() {
-            const { error } = await db.auth.signInWithPassword({ email: document.getElementById('auth-email').value, password: document.getElementById('auth-password').value });
-            if (error) alert(error.message);
-        }
-        async function handleSignUp() {
-            const { error } = await db.auth.signUp({ email: document.getElementById('auth-email').value, password: document.getElementById('auth-password').value });
-            if (error) alert(error.message); else alert("Check Email!");
-        }
+        // --- UTILS ---
+        function cycleType(exI, sI) { const t = ['Normal', 'Warmup', 'Dropset', 'Failure']; const s = activeW.exercises[exI].sets[sI]; s.type = t[(t.indexOf(s.type)+1)%t.length]; renderWorkoutUI(); }
+        function addSet(exI) { const last = activeW.exercises[exI].sets.slice(-1)[0]; activeW.exercises[exI].sets.push({ ...last, done: false }); renderWorkoutUI(); }
+        function startTimer() { timerInt = setInterval(() => { const d = Math.floor((new Date()-activeW.startTime)/1000); document.getElementById('wo-timer').textContent = `${Math.floor(d/60).toString().padStart(2,'0')}:${(d%60).toString().padStart(2,'0')}`; }, 1000); }
+        function refreshPRs() { pBests = {}; hData.forEach(w => w.sets.forEach(s => { const val = s.weight*(1+s.reps/30); if(!pBests[s.exercise_id] || val > pBests[s.exercise_id].val) pBests[s.exercise_id] = { val, weight: s.weight, reps: s.reps, name: s.exercises?.name }; })); document.getElementById('personal-bests').innerHTML = Object.values(pBests).sort((a,b) => b.val - a.val).slice(0,5).map(pr => `<div class="exercise-card flex justify-between items-center"><div><p class="meta-label mb-1">${pr.name}</p><h3 class="text-xl font-black">${pr.weight} KG</h3></div><p class="text-sm font-bold text-indigo-600">${pr.reps} REPS</p></div>`).join(''); }
+        function showPicker(isRE) { isREPicker = isRE; const modal = document.getElementById('picker-modal'); modal.classList.remove('hidden'); setTimeout(()=>modal.classList.add('active'), 10); renderFilters(); runSearch(""); }
+        function closePicker() { const modal = document.getElementById('picker-modal'); modal.classList.remove('active'); setTimeout(()=>modal.classList.add('hidden'), 400); }
+        function renderFilters() { const mus = ["Brust", "Rücken", "Beine", "Schultern", "Arme", "Bauch", "Ganzkörper"]; document.getElementById('p-filters').innerHTML = mus.map(m => `<button class="filter-chip ${sMuscle===m?'active':''}" onclick="sMuscle=sMuscle==='${m}'?null:'${m}'; renderFilters(); runSearch(document.getElementById('p-search').value)">${m}</button>`).join(''); }
+        async function runSearch(qStr) { let q = db.from('exercises').select('*'); if (qStr) q = q.ilike('name', `%${qStr}%`); if (sMuscle) q = q.eq('muscle', sMuscle); const { data } = await q.order('name').limit(20); pRes = data || []; document.getElementById('p-list').innerHTML = pRes.map((ex, i) => `<div class="exercise-card flex items-center space-x-6 active:opacity-50 transition" onclick="selectEx(${i})"><div class="w-16 h-16 rounded-[20px] bg-gray-50 flex items-center justify-center overflow-hidden flex-shrink-0"><img src="${ex.gif_url}" class="w-full h-full object-cover mix-blend-multiply"></div><div><h3 class="text-lg font-bold">${ex.name}</h3><p class="meta-label text-[8px]">${ex.muscle}</p></div></div>`).join(''); }
+        function selectEx(i) { const ex = pRes[i]; if(isREPicker) { reEx.push(ex); document.getElementById('re-list').innerHTML = reEx.map(e => `<div class="bg-gray-50 p-4 rounded-xl font-bold text-xs uppercase">${e.name}</div>`).join(''); } else { activeW.exercises.push({ ...ex, sets: [{ weight: '', reps: '', type: 'Normal', done: false }] }); renderWorkoutUI(); } closePicker(); }
+        async function openDetail(id, url, name) { document.getElementById('d-title').textContent = name; document.getElementById('d-gif').src = url; document.getElementById('detail-modal').classList.remove('hidden'); const { data: sets } = await db.from('sets').select('*, workouts(start_time)').eq('exercise_id', id).order('created_at'); const prog = {}; sets.forEach(s => { const d = new Date(s.workouts.start_time).toLocaleDateString('de-DE', {day:'2-digit',month:'2-digit'}); const val = s.weight * (1 + s.reps/30); if(!prog[d] || val > prog[d]) prog[d] = val; }); if(charts.detail) charts.detail.destroy(); charts.detail = new Chart(document.getElementById('d-chart'), { type: 'line', data: { labels: Object.keys(prog), datasets: [{ data: Object.values(prog), borderColor: '#000', borderWidth: 4, pointRadius: 0, tension: 0.4 }] }, options: { responsive: true, maintainAspectRatio: false, scales: { y: { display: false }, x: { grid: { display: false } } }, plugins: { legend: { display: false } } } }); }
+        function closeDetail() { document.getElementById('detail-modal').classList.add('hidden'); }
+        async function saveProfileSettings() { await db.auth.updateUser({ data: { full_name: document.getElementById('p-name-input').value, gemini_key: document.getElementById('p-api-key').value } }); }
+        async function handleSignIn() { const { error } = await db.auth.signInWithPassword({ email: document.getElementById('auth-email').value, password: document.getElementById('auth-password').value }); if(error) alert(error.message); }
+        async function handleSignUp() { const { error } = await db.auth.signUp({ email: document.getElementById('auth-email').value, password: document.getElementById('auth-password').value }); if(error) alert(error.message); else alert("Check Mail!"); }
         async function handleSignOut() { await db.auth.signOut(); }
-
+        function openEditor() { reEx = []; document.getElementById('re-name').value = ""; document.getElementById('re-list').innerHTML = ""; document.getElementById('routine-editor').classList.remove('hidden'); }
+        function closeRoutineEditor() { document.getElementById('routine-editor').classList.add('hidden'); }
+        async function saveNewRoutine() { const n = document.getElementById('re-name').value; if(!n || reEx.length===0) return; const { data } = await db.from('routines').insert([{ user_id: user.id, name: n }]).select(); const entries = reEx.map((e, i) => ({ routine_id: data[0].id, exercise_id: e.id, exercise_order: i })); await db.from('routine_exercises').insert(entries); window.location.reload(); }
+        
+        document.getElementById('p-search').oninput = (e) => runSearch(e.target.value);
         checkAuth();
     </script>
 </body>
